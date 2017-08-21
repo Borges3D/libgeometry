@@ -3,6 +3,12 @@
 
 namespace Geometry {
 
+bool
+Closed_curve_2::is_periodic() const
+{
+    return curve_->cuopen = -1;
+}
+
 const std::shared_ptr<const Polygon_2>
 Closed_curve_2::to_polygon_2(const double epsilon) const
 {

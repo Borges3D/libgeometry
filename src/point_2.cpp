@@ -18,4 +18,16 @@ Point_2::y() const
     return y_;
 }
 
+double
+distance(const Point_2& p1, const Point_2& p2)
+{
+    return length(p2 - p1);
+}
+
+Vector_2
+operator-(const Point_2& p1, const Point_2& p2)
+{
+    return Vector_2(p1.x() - p2.x(), p2.y() - p1.y());
+}
+
 } // namespace Geometry

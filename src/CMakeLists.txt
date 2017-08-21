@@ -8,12 +8,14 @@ SET(GEOMETRY_SOURCES
     clipper_utilities.cpp
     closed_curve_2.cpp
     curve.cpp
+    curve_2.cpp
     open_curve_2.cpp
     point_2.cpp
     polygon_2.cpp
     polyline_2.cpp
     rectangle_2.cpp
     utilities.cpp
+    vector_2.cpp
 )
 SET(GEOMETRY_INCLUDE_DIRS
     ${CLIPPER_INCLUDE_DIR}

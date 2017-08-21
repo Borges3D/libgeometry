@@ -9,6 +9,7 @@ class Polygon_2;
 
 class Closed_curve_2 : public Curve_2 {
 public:
+    bool is_periodic() const;
     const std::shared_ptr<const Polygon_2>
     to_polygon_2(const double epsilon) const;
 };

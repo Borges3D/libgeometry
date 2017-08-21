@@ -21,13 +21,13 @@ to_clip_type(const Clip_type type)
 }
 
 ClipperLib::Path
-to_path(const Polygon_2& polygon)
+to_path(const Polygon_2& ps)
 {
     ClipperLib::Path path;
-    for (std::size_t index = 0; index < polygon.size(); ++index) {
-        path.push_back(to_int_point(polygon.point(index)));
+    for (std::size_t index = 0; index < ps.size(); ++index) {
+        path.push_back(to_int_point(ps[index]));
     }
-    path.push_back(to_int_point(polygon.point(0)));
+    path.push_back(to_int_point(ps[0]));
     return path;
 }
 
@@ -46,8 +46,9 @@ Polygon_2::size() const
 }
 
 const Point_2&
-Polygon_2::point(std::size_t index) const
+Polygon_2::operator[](std::size_t index) const
 {
+    assert(index < points_.size());
     return points_[index];
 }
 
@@ -57,26 +58,44 @@ Polygon_2::Polygon_2(const std::vector<Point_2> points)
     assert(points_.size() >= 3);
 }
 
-std::vector<std::shared_ptr<const Polygon_2>>
+const std::vector<std::shared_ptr<const Polygon_2>>
 clip(const Clip_type type,
-     const std::vector<std::reference_wrapper<const Polygon_2>>& polygons_1,
-     const std::vector<std::reference_wrapper<const Polygon_2>>& polygons_2)
+     const std::vector<std::reference_wrapper<const Polygon_2>>& pss1,
+     const std::vector<std::reference_wrapper<const Polygon_2>>& pss2)
 {
     ClipperLib::Clipper clipper;
-    for (const Polygon_2& polygon : polygons_1) {
-        clipper.AddPath(to_path(polygon), ClipperLib::ptSubject, true);
+    for (const Polygon_2& ps : pss1) {
+        clipper.AddPath(to_path(ps), ClipperLib::ptSubject, true);
     }
-    for (const Polygon_2& polygon : polygons_2) {
-        clipper.AddPath(to_path(polygon), ClipperLib::ptClip, true);
+    for (const Polygon_2& ps : pss2) {
+        clipper.AddPath(to_path(ps), ClipperLib::ptClip, true);
     }
-    ClipperLib::Paths paths;
-    clipper.Execute(to_clip_type(type), paths, ClipperLib::pftNonZero,
+    ClipperLib::Paths pss_;
+    clipper.Execute(to_clip_type(type), pss_, ClipperLib::pftNonZero,
                     ClipperLib::pftNonZero);
-    std::vector<std::shared_ptr<const Polygon_2>> polygons;
-    for (const ClipperLib::Path& path : paths) {
-        polygons.push_back(to_polygon_2(path));
+    std::vector<std::shared_ptr<const Polygon_2>> pss;
+    for (const ClipperLib::Path& ps : pss_) {
+        pss.push_back(to_polygon_2(ps));
     }
-    return polygons;
+    return pss;
+}
+
+const std::vector<double>
+parameters(const Polygon_2& ps)
+{
+    std::vector<double> ts;
+    ts.reserve(ps.size());
+    double dsum = 0.0;
+    ts.push_back(dsum);
+    for (std::size_t index = 1; index < ps.size(); ++index) {
+        dsum += distance(ps[index - 1], ps[index]);
+        ts.push_back(dsum);
+    }
+    dsum += distance(ps[ps.size() - 1], ps[0]);
+    for (double& t : ts) {
+        t /= dsum;
+    }
+    return ts;
 }
 
 } // namespace Geometry

@@ -9,11 +9,11 @@ namespace Geometry {
 namespace {
 
 ClipperLib::Path
-to_path(const Polyline_2& polyline)
+to_path(const Polyline_2& ps)
 {
     ClipperLib::Path path;
-    for (std::size_t index = 0; index < polyline.size(); ++index) {
-        path.push_back(to_int_point(polyline.point(index)));
+    for (std::size_t index = 0; index < ps.size(); ++index) {
+        path.push_back(to_int_point(ps[index]));
     }
     return path;
 }
@@ -63,8 +63,9 @@ Polyline_2::size() const
 }
 
 const Point_2&
-Polyline_2::point(std::size_t index) const
+Polyline_2::operator[](std::size_t index) const
 {
+    assert(index < points_.size());
     return points_[index];
 }
 
@@ -74,21 +75,38 @@ Polyline_2::Polyline_2(const std::vector<Point_2> points)
     assert(points_.size() >= 2);
 }
 
-std::vector<std::shared_ptr<const Polygon_2>>
-offset(const Polyline_2& polyline, const Offset_options& options)
+const std::vector<std::shared_ptr<const Polygon_2>>
+offset(const Polyline_2& ps, const Offset_options& options)
 {
     ClipperLib::ClipperOffset offset;
-    offset.AddPath(to_path(polyline), to_join_type(options.join_type),
+    offset.AddPath(to_path(ps), to_join_type(options.join_type),
                    to_end_type(options.cap_type));
     ClipperLib::Paths paths;
     offset.ArcTolerance = to_fixed(absolute_epsilon);
     offset.MiterLimit = options.miter_limit;
     offset.Execute(paths, to_fixed(options.distance));
-    std::vector<std::shared_ptr<const Polygon_2>> polygons;
+    std::vector<std::shared_ptr<const Polygon_2>> pss;
     for (const ClipperLib::Path& path : paths) {
-        polygons.push_back(to_polygon_2(path));
+        pss.push_back(to_polygon_2(path));
     }
-    return polygons;
+    return pss;
+}
+
+const std::vector<double>
+parameters(const Polyline_2& ps)
+{
+    std::vector<double> ts;
+    ts.reserve(ps.size());
+    double dsum = 0.0;
+    ts.push_back(dsum);
+    for (std::size_t index = 1; index < ps.size(); ++index) {
+        dsum += distance(ps[index - 1], ps[index]);
+        ts.push_back(dsum);
+    }
+    for (double& t : ts) {
+        t /= dsum;
+    }
+    return ts;
 }
 
 } // namespace Geometry

@@ -1,6 +1,8 @@
 #ifndef GEOMETRY_POINT_2_H
 #define GEOMETRY_POINT_2_H
 
+#include "vector_2.h"
+
 namespace Geometry {
 
 class Point_2 {
@@ -13,6 +15,9 @@ private:
     const double x_;
     const double y_;
 };
+
+double distance(const Point_2& p1, const Point_2& p2);
+Vector_2 operator-(const Point_2& p1, const Point_2& p2);
 
 } // namespace Geometry
 

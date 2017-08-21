@@ -18,7 +18,7 @@ public:
     static const std::shared_ptr<const Polygon_2>
     create(const std::vector<Point_2> points);
     const std::size_t size() const;
-    const Point_2& point(std::size_t index) const;
+    const Point_2& operator[](std::size_t index) const;
 
 private:
     explicit Polygon_2(const std::vector<Point_2> points);
@@ -26,10 +26,11 @@ private:
     const std::vector<Point_2> points_;
 };
 
-std::vector<std::shared_ptr<const Polygon_2>>
+const std::vector<std::shared_ptr<const Polygon_2>>
 clip(const Clip_type type,
-     const std::vector<std::reference_wrapper<const Polygon_2>>& polygons_1,
-     const std::vector<std::reference_wrapper<const Polygon_2>>& polygons_2);
+     const std::vector<std::reference_wrapper<const Polygon_2>>& pss1,
+     const std::vector<std::reference_wrapper<const Polygon_2>>& pss2);
+const std::vector<double> parameters(const Polygon_2& ps);
 
 } // namespace Geometry
 

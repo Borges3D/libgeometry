@@ -6,25 +6,25 @@
 namespace Geometry {
 
 ClipperLib::IntPoint
-to_int_point(const Point_2& point)
+to_int_point(const Point_2& p)
 {
-    return ClipperLib::IntPoint(to_fixed(point.x()), to_fixed(point.y()));
+    return ClipperLib::IntPoint(to_fixed(p.x()), to_fixed(p.y()));
 }
 
 Point_2
-to_point_2(const ClipperLib::IntPoint& point)
+to_point_2(const ClipperLib::IntPoint& p)
 {
-    return Point_2(to_float(point.X), to_float(point.Y));
+    return Point_2(to_float(p.X), to_float(p.Y));
 }
 
 const std::shared_ptr<const Polygon_2>
-to_polygon_2(const ClipperLib::Path& path)
+to_polygon_2(const ClipperLib::Path& ps)
 {
-    std::vector<Point_2> points;
-    for (const ClipperLib::IntPoint& point : path) {
-        points.push_back(to_point_2(point));
+    std::vector<Point_2> ps_;
+    for (const ClipperLib::IntPoint& p : ps) {
+        ps_.push_back(to_point_2(p));
     }
-    return Polygon_2::create(std::move(points));
+    return Polygon_2::create(std::move(ps_));
 }
 
 } // namespace Geometry
