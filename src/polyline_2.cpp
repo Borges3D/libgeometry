@@ -73,6 +73,11 @@ Polyline_2::Polyline_2(const std::vector<Point_2> points)
     : points_(std::move(points))
 {
     assert(points_.size() >= 2);
+#ifndef NDEBUG
+    for (std::size_t index = 0; index < points.size() - 1; ++index) {
+        assert(!is_approximately_equal(points_[index], points[index + 1]));
+    }
+#endif // !NDEBUG
 }
 
 const std::vector<std::shared_ptr<const Polygon_2>>

@@ -20,19 +20,19 @@ Vector_2::y() const
     return y_;
 }
 
-double
+const double
 dot_product(const Vector_2& v1, const Vector_2& v2)
 {
     return v1.x() * v2.x() + v1.y() * v2.y();
 }
 
-double
+const double
 length(const Vector_2& v)
 {
     return std::sqrt(squared_length(v));
 }
 
-double
+const double
 squared_length(const Vector_2& v)
 {
     return dot_product(v, v);

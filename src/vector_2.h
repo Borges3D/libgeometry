@@ -14,9 +14,9 @@ private:
     const double y_;
 };
 
-double dot_product(const Vector_2& v1, const Vector_2& v2);
-double length(const Vector_2& v);
-double squared_length(const Vector_2& v);
+const double dot_product(const Vector_2& v1, const Vector_2& v2);
+const double length(const Vector_2& v);
+const double squared_length(const Vector_2& v);
 
 } // namespace Geometry
 

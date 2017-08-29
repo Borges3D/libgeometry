@@ -14,6 +14,7 @@ SET(GEOMETRY_SOURCES
     polygon_2.cpp
     polyline_2.cpp
     rectangle_2.cpp
+    sisl_utilities.cpp
     utilities.cpp
     vector_2.cpp
 )

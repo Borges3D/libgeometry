@@ -16,8 +16,9 @@ private:
     const double y_;
 };
 
-double distance(const Point_2& p1, const Point_2& p2);
-Vector_2 operator-(const Point_2& p1, const Point_2& p2);
+const double distance(const Point_2& p1, const Point_2& p2);
+const bool is_approximately_equal(const Point_2& p1, const Point_2& p2);
+const Vector_2 operator-(const Point_2& p1, const Point_2& p2);
 
 } // namespace Geometry
 
