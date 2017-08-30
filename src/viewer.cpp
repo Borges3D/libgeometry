@@ -31,13 +31,13 @@ draw(const Polyline_2& ps)
 void
 draw(const Closed_curve_2& c)
 {
-    draw(*c.to_polygon_2(1E-3));
+    draw(*c.to_polygon_2());
 }
 
 void
 draw(const Open_curve_2& c)
 {
-    draw(*c.to_polyline_2(1E-3));
+    draw(*c.to_polyline_2());
 }
 
 void
@@ -52,31 +52,55 @@ draw(const Rectangle_2& r)
     draw(*Curve::create(r));
 }
 
+std::shared_ptr<const Open_curve_2> c;
+
 void
 display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    std::shared_ptr<const Open_curve_2> curve_1 = Curve_2::fit_open(
-        3, {Point_2(-0.75, -0.5), Point_2(0.5, 0.5), Point_2(0.0, 0.75)});
-    std::shared_ptr<const Open_curve_2> curve_2 = Curve_2::create(
-        *Polyline_2::create({Point_2(+0.5, -0.5), Point_2(-0.5, +0.5)}));
-    std::vector<std::shared_ptr<const Polygon_2>> pss1 =
-        offset(*curve_1->to_polyline_2(1E-3), 0.1);
-    std::vector<std::shared_ptr<const Polygon_2>> pss2 =
-        offset(*curve_2->to_polyline_2(1E-3), 0.1);
-    std::vector<std::reference_wrapper<const Polygon_2>> ps_refs_1;
-    for (const std::shared_ptr<const Polygon_2> ps : pss1) {
-        ps_refs_1.push_back(*ps);
-    }
-    std::vector<std::reference_wrapper<const Polygon_2>> ps_refs_2;
-    for (const std::shared_ptr<const Polygon_2> ps : pss2) {
-        ps_refs_2.push_back(*ps);
-    }
-    for (const std::shared_ptr<const Polygon_2>& ps :
-         clip(Clip_type::Union, ps_refs_1, ps_refs_2)) {
-        draw(*Curve::create(*ps));
+    glColor3f(1.0, 0.0, 0.0);
+    draw(*c);
+    for (std::shared_ptr<const Closed_curve_2> c : offset(*c, 0.2)) {
+        glColor3f(0.0, 1.0, 0.0);
+        draw(*c);
+        for (std::shared_ptr<const Closed_curve_2> c : offset(*c, 0.1)) {
+            glColor3f(0.0, 0.0, 1.0);
+            draw(*c);
+        }
     }
     glutSwapBuffers();
+}
+
+void
+generate(void)
+{
+    c = nullptr;
+    do {
+        std::vector<Point_2> ps;
+        for (std::size_t i = 0; i < 10; ++i) {
+            ps.push_back(Point_2(1.5 * (random() % 100) / 100 - 0.75,
+                                 1.5 * (random() % 100) / 100 - 0.75));
+        }
+        try {
+            c = Curve_2::fit_open(3, ps);
+        }
+        catch (...) {}
+    }
+    while (!c);
+}
+
+void
+idle(void)
+{
+    generate();
+    glutPostRedisplay();
+}
+
+void
+keyboard(unsigned char key, int x, int y)
+{
+    generate();
+    glutPostRedisplay();
 }
 
 void
@@ -96,7 +120,10 @@ main(int argc, char** argv)
     glutInitDisplayMode(GLUT_DOUBLE);
     glutCreateWindow(argv[0]);
     glutDisplayFunc(display);
+    // glutIdleFunc(idle);
+    glutKeyboardFunc(keyboard);
     glutReshapeFunc(reshape);
+    generate();
     glutMainLoop();
     return 0;
 }

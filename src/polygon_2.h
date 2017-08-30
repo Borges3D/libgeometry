@@ -2,6 +2,7 @@
 #define GEOMETRY_POLYGON_2_H
 
 #include "point_2.h"
+#include "offset_options.h"
 #include <memory>
 #include <vector>
 
@@ -15,7 +16,7 @@ enum class Clip_type {
 
 class Polygon_2 {
 public:
-    static const std::shared_ptr<const Polygon_2>
+    static std::shared_ptr<const Polygon_2>
     create(const std::vector<Point_2> points);
     const std::size_t size() const;
     const Point_2& operator[](std::size_t index) const;
@@ -30,6 +31,8 @@ const std::vector<std::shared_ptr<const Polygon_2>>
 clip(const Clip_type type,
      const std::vector<std::reference_wrapper<const Polygon_2>>& pss1,
      const std::vector<std::reference_wrapper<const Polygon_2>>& pss2);
+const std::vector<std::shared_ptr<const Polygon_2>>
+offset(const Polygon_2& ps, const Offset_options& options);
 const std::vector<double> parameters(const Polygon_2& ps);
 
 } // namespace Geometry

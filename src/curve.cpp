@@ -6,7 +6,9 @@
 #include "polygon_2.h"
 #include "polyline_2.h"
 #include "rectangle_2.h"
+#include "utilities.h"
 #include <cassert>
+#include <cmath>
 #include <utility>
 
 namespace Geometry {
@@ -41,7 +43,7 @@ fit_helper(const int iopen, const int ik, const std::vector<Point_2>& ps)
     s1356(epoint.data(), inbpnt, idim, nptyp.data(), icnsta, icnend, iopen, ik,
           astpar, &cendpar, &rc_, &gpar_, &jnbpar, &jstat);
     if (jstat < 0) {
-        throw;
+        throw std::runtime_error("");
     }
     std::unique_ptr<SISLCurve, decltype(&freeCurve)> rc(rc_, &freeCurve);
     std::unique_ptr<double[], decltype(&std::free)> gpar(gpar_, &std::free);
@@ -50,7 +52,7 @@ fit_helper(const int iopen, const int ik, const std::vector<Point_2>& ps)
 
 } // namespace
 
-const std::shared_ptr<const Closed_curve_2>
+std::shared_ptr<const Closed_curve_2>
 Curve::create(const Circle_2& c)
 {
     const Point_2& center = c.center();
@@ -65,11 +67,11 @@ Curve::create(const Circle_2& c)
     s1522(normal, centre, ellipaxis, ratio, dim, &ellipse, &jstat);
     std::shared_ptr<const Curve> curve(new Curve(
         std::unique_ptr<SISLCurve, decltype(&freeCurve)>(ellipse, &freeCurve)));
-    return std::shared_ptr<const Closed_curve_2>(curve,
-                                                 &curve->as_closed_curve_2());
+    return std::shared_ptr<const Closed_curve_2>(
+        curve, &curve->as_curve_2().as_closed_curve_2());
 }
 
-const std::shared_ptr<const Closed_curve_2>
+std::shared_ptr<const Closed_curve_2>
 Curve::create(const Polygon_2& ps)
 {
     const int number = ps.size() + 1;
@@ -80,7 +82,7 @@ Curve::create(const Polygon_2& ps)
             std::malloc((ts.size() + 2) * sizeof(double))),
         &std::free);
     if (!knots) {
-        throw;
+        throw std::runtime_error("");
     }
     knots[0] = 0.0;
     for (std::size_t index = 0; index < ts.size(); ++index) {
@@ -92,7 +94,7 @@ Curve::create(const Polygon_2& ps)
             std::malloc((ps.size() + 1) * 2 * sizeof(double))),
         &std::free);
     if (!coeff) {
-        throw;
+        throw std::runtime_error("");
     }
     for (std::size_t index = 0; index < ps.size(); ++index) {
         std::size_t base = index * 2;
@@ -112,15 +114,15 @@ Curve::create(const Polygon_2& ps)
                  copy),
         &freeCurve);
     if (!curve_) {
-        throw;
+        throw std::runtime_error("");
     }
     curve_->cuopen = 0;
     std::shared_ptr<const Curve> curve(new Curve(std::move(curve_)));
-    return std::shared_ptr<const Closed_curve_2>(curve,
-                                                 &curve->as_closed_curve_2());
+    return std::shared_ptr<const Closed_curve_2>(
+        curve, &curve->as_curve_2().as_closed_curve_2());
 }
 
-const std::shared_ptr<const Open_curve_2>
+std::shared_ptr<const Open_curve_2>
 Curve::create(const Polyline_2& ps)
 {
     const int number = ps.size();
@@ -131,7 +133,7 @@ Curve::create(const Polyline_2& ps)
             std::malloc((ts.size() + 2) * sizeof(double))),
         &std::free);
     if (!knots) {
-        throw;
+        throw std::runtime_error("");
     }
     knots[0] = ts[0];
     for (std::size_t index = 0; index < ts.size(); ++index) {
@@ -143,7 +145,7 @@ Curve::create(const Polyline_2& ps)
             std::malloc(ps.size() * 2 * sizeof(double))),
         &std::free);
     if (!coeff) {
-        throw;
+        throw std::runtime_error("");
     }
     for (std::size_t index = 0; index < ps.size(); ++index) {
         std::size_t base = index * 2;
@@ -159,14 +161,14 @@ Curve::create(const Polyline_2& ps)
                  copy),
         &freeCurve);
     if (!curve_) {
-        throw;
+        throw std::runtime_error("");
     }
     std::shared_ptr<const Curve> curve(new Curve(std::move(curve_)));
-    return std::shared_ptr<const Open_curve_2>(curve,
-                                               &curve->as_open_curve_2());
+    return std::shared_ptr<const Open_curve_2>(
+        curve, &curve->as_curve_2().as_open_curve_2());
 }
 
-const std::shared_ptr<const Closed_curve_2>
+std::shared_ptr<const Closed_curve_2>
 Curve::create(const Rectangle_2& r)
 {
     const Point_2& start = r.start();
@@ -179,22 +181,70 @@ Curve::create(const Rectangle_2& r)
         {Point_2(x1, y1), Point_2(x2, y1), Point_2(x2, y2), Point_2(x1, y2)}));
 }
 
-const std::shared_ptr<const Closed_curve_2>
+std::shared_ptr<const Closed_curve_2>
+Curve::fit(const std::size_t order, const Polygon_2& ps,
+           const double smoothness)
+{
+    std::vector<double> point;
+    point.reserve((ps.size() + 1) * 2);
+    for (std::size_t index = 0; index < ps.size(); ++index) {
+        const Point_2& p = ps[index];
+        point.push_back(p.x());
+        point.push_back(p.y());
+    }
+    point.push_back(point[0]);
+    point.push_back(point[1]);
+    std::vector<double> derivate;
+    derivate.reserve((ps.size() + 1) * 2);
+    for (std::size_t index = 0; index < ps.size(); ++index) {
+        const Point_2& p = ps[index];
+        Vector_2 v1 = normalize(p - ps[(index + ps.size() - 1) % ps.size()]);
+        Vector_2 v2 = normalize(ps[(index + 1) % ps.size()] - p);
+        if (is_definitely_less(std::fabs(cross_product(v1, v2)), smoothness) &&
+            is_definitely_less(0.0, dot_product(v1, v2))) {
+            Vector_2 v = lerp(v1, v2, 0.5);
+            derivate.push_back(v.x());
+            derivate.push_back(v.y());
+        }
+        else {
+            derivate.push_back(0.0);
+            derivate.push_back(0.0);
+        }
+    }
+    derivate.push_back(derivate[0]);
+    derivate.push_back(derivate[1]);
+    const int numpnt = ps.size() + 1;
+    constexpr int dim = 2;
+    constexpr int typepar = 1;
+    SISLCurve* curve_ = nullptr;
+    int stat = 0;
+    s1380(point.data(), derivate.data(), numpnt, dim, typepar, &curve_,
+          &stat);
+    if (stat < 0) {
+        throw std::runtime_error("");
+    }
+    std::shared_ptr<const Curve> curve(new Curve(
+        std::unique_ptr<SISLCurve, decltype(&freeCurve)>(curve_, &freeCurve)));
+    return std::shared_ptr<const Closed_curve_2>(
+        curve, &curve->as_curve_2().as_closed_curve_2());
+}
+
+std::shared_ptr<const Closed_curve_2>
 Curve::fit_closed(const bool periodic, const std::size_t order,
                   const std::vector<Point_2>& ps)
 {
     std::shared_ptr<const Curve> curve(
         new Curve(fit_helper(periodic ? -1 : 0, order, ps)));
-    return std::shared_ptr<const Closed_curve_2>(curve,
-                                                 &curve->as_closed_curve_2());
+    return std::shared_ptr<const Closed_curve_2>(
+        curve, &curve->as_curve_2().as_closed_curve_2());
 }
 
-const std::shared_ptr<const Open_curve_2>
+std::shared_ptr<const Open_curve_2>
 Curve::fit_open(const std::size_t order, const std::vector<Point_2>& ps)
 {
     std::shared_ptr<const Curve> curve(new Curve(fit_helper(1, order, ps)));
-    return std::shared_ptr<const Open_curve_2>(curve,
-                                               &curve->as_open_curve_2());
+    return std::shared_ptr<const Open_curve_2>(
+        curve, &curve->as_curve_2().as_open_curve_2());
 }
 
 const bool
@@ -233,20 +283,6 @@ Curve::as_curve_2() const
 {
     assert(dimension() == 2);
     return static_cast<const Curve_2&>(*this);
-}
-
-const Closed_curve_2&
-Curve::as_closed_curve_2() const
-{
-    assert(is_closed() && dimension() == 2);
-    return static_cast<const Closed_curve_2&>(*this);
-}
-
-const Open_curve_2&
-Curve::as_open_curve_2() const
-{
-    assert(!is_closed() && dimension() == 2);
-    return static_cast<const Open_curve_2&>(*this);
 }
 
 Curve::Curve(std::unique_ptr<SISLCurve, decltype(&freeCurve)> curve)

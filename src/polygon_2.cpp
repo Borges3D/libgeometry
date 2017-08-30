@@ -1,5 +1,6 @@
 #include "polygon_2.h"
 #include "clipper_utilities.h"
+#include "utilities.h"
 #include <cassert>
 #include <utility>
 
@@ -33,7 +34,7 @@ to_path(const Polygon_2& ps)
 
 } // namespace
 
-const std::shared_ptr<const Polygon_2>
+std::shared_ptr<const Polygon_2>
 Polygon_2::create(const std::vector<Point_2> points)
 {
     return std::shared_ptr<const Polygon_2>(new Polygon_2(std::move(points)));
@@ -61,7 +62,7 @@ Polygon_2::Polygon_2(const std::vector<Point_2> points)
         assert(!is_approximately_equal(points_[index], points[index + 1]));
     }
 #endif // !NDEBUG
-    assert(!is_approximately_equal(points_[points.size() - 1], points[0]));
+    assert(!is_approximately_equal(points_.back(), points_.front()));
 }
 
 const std::vector<std::shared_ptr<const Polygon_2>>
@@ -82,6 +83,23 @@ clip(const Clip_type type,
     std::vector<std::shared_ptr<const Polygon_2>> pss;
     for (const ClipperLib::Path& ps : pss_) {
         pss.push_back(to_polygon_2(ps));
+    }
+    return pss;
+}
+
+const std::vector<std::shared_ptr<const Polygon_2>>
+offset(const Polygon_2& ps, const Offset_options& options)
+{
+    ClipperLib::ClipperOffset offset;
+    offset.AddPath(to_path(ps), to_join_type(options.join_type),
+                   to_end_type(options.cap_type));
+    ClipperLib::Paths paths;
+    offset.ArcTolerance = to_fixed(options.tolerance);
+    offset.MiterLimit = options.miter_limit;
+    offset.Execute(paths, to_fixed(options.distance));
+    std::vector<std::shared_ptr<const Polygon_2>> pss;
+    for (const ClipperLib::Path& path : paths) {
+        pss.push_back(to_polygon_2(path));
     }
     return pss;
 }

@@ -9,6 +9,7 @@ SET(GEOMETRY_SOURCES
     closed_curve_2.cpp
     curve.cpp
     curve_2.cpp
+    offset_options.cpp
     open_curve_2.cpp
     point_2.cpp
     polygon_2.cpp

@@ -18,18 +18,21 @@ class Rectangle_2;
 
 class Curve {
 public:
-    static const std::shared_ptr<const Closed_curve_2>
+    static std::shared_ptr<const Closed_curve_2>
     create(const Circle_2& c);
-    static const std::shared_ptr<const Closed_curve_2>
+    static std::shared_ptr<const Closed_curve_2>
     create(const Polygon_2& ps);
-    static const std::shared_ptr<const Open_curve_2>
+    static std::shared_ptr<const Open_curve_2>
     create(const Polyline_2& ps);
-    static const std::shared_ptr<const Closed_curve_2>
+    static std::shared_ptr<const Closed_curve_2>
     create(const Rectangle_2& r);
-    static const std::shared_ptr<const Closed_curve_2>
+    static std::shared_ptr<const Closed_curve_2>
+    fit(const std::size_t order, const Polygon_2& ps,
+        const double smoothness = 0.25);
+    static std::shared_ptr<const Closed_curve_2>
     fit_closed(const bool periodic, const std::size_t order,
                const std::vector<Point_2>& ps);
-    static const std::shared_ptr<const Open_curve_2>
+    static std::shared_ptr<const Open_curve_2>
     fit_open(const std::size_t order, const std::vector<Point_2>& ps);
     const bool is_closed() const;
     const std::size_t size() const;
@@ -37,8 +40,6 @@ public:
     const std::size_t dimension() const;
     const double knot(const std::size_t index) const;
     const Curve_2& as_curve_2() const;
-    const Closed_curve_2& as_closed_curve_2() const;
-    const Open_curve_2& as_open_curve_2() const;
 
 protected:
     Curve(std::unique_ptr<SISLCurve, decltype(&freeCurve)> curve);

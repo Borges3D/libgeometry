@@ -2,14 +2,21 @@
 #define GEOMETRY_CURVE_2_H
 
 #include "curve.h"
+#include "offset_options.h"
 #include "point_2.h"
+#include <vector>
 
 namespace Geometry {
 
 class Curve_2 : public Curve {
 public:
     const Point_2 control(const std::size_t index) const;
+    const Closed_curve_2& as_closed_curve_2() const;
+    const Open_curve_2& as_open_curve_2() const;
 };
+
+std::vector<std::shared_ptr<const Curve_2>>
+offset(const Curve_2& c, const Offset_options& options);
 
 } // namespace Geometry
 

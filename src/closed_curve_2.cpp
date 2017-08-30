@@ -10,10 +10,10 @@ Closed_curve_2::is_periodic() const
     return curve_->cuopen = -1;
 }
 
-const std::shared_ptr<const Polygon_2>
-Closed_curve_2::to_polygon_2(const double epsilon) const
+std::shared_ptr<const Polygon_2>
+Closed_curve_2::to_polygon_2(const double tolerance) const
 {
-    const double epsge = epsilon;
+    const double epsge = tolerance;
     double* points_ = nullptr;
     int numpoints = 0;
     int stat = 0;
@@ -23,6 +23,17 @@ Closed_curve_2::to_polygon_2(const double epsilon) const
     }
     std::unique_ptr<double[], decltype(&std::free)> points(points_, &std::free);
     return Polygon_2::create(to_points(true, numpoints, points.get()));
+}
+
+std::vector<std::shared_ptr<const Closed_curve_2>>
+offset(const Closed_curve_2& c, const Offset_options& options)
+{
+    std::vector<std::shared_ptr<const Closed_curve_2>> cs;
+    for (const std::shared_ptr<const Polygon_2>& ps :
+         offset(*c.to_polygon_2(options.tolerance), options)) {
+        cs.push_back(Curve::fit(c.order(), *ps, options.smoothness));
+    }
+    return cs;
 }
 
 } // namespace Geometry

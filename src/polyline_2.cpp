@@ -18,39 +18,9 @@ to_path(const Polyline_2& ps)
     return path;
 }
 
-const ClipperLib::EndType
-to_end_type(const Cap_type type)
-{
-    switch (type) {
-    case Cap_type::Butt:
-        return ClipperLib::etOpenButt;
-    case Cap_type::Round:
-        return ClipperLib::etOpenRound;
-    case Cap_type::Square:
-        return ClipperLib::etOpenSquare;
-    }
-}
-
-const ClipperLib::JoinType
-to_join_type(const Join_type type)
-{
-    switch (type) {
-    case Join_type::Miter:
-        return ClipperLib::jtMiter;
-    case Join_type::Round:
-        return ClipperLib::jtRound;
-    case Join_type::Square:
-        return ClipperLib::jtSquare;
-    }
-}
-
 } // namespace
 
-Offset_options::Offset_options(double distance) : distance(distance)
-{
-}
-
-const std::shared_ptr<const Polyline_2>
+std::shared_ptr<const Polyline_2>
 Polyline_2::create(const std::vector<Point_2> points)
 {
     return std::shared_ptr<const Polyline_2>(new Polyline_2(std::move(points)));
@@ -87,7 +57,7 @@ offset(const Polyline_2& ps, const Offset_options& options)
     offset.AddPath(to_path(ps), to_join_type(options.join_type),
                    to_end_type(options.cap_type));
     ClipperLib::Paths paths;
-    offset.ArcTolerance = to_fixed(absolute_epsilon);
+    offset.ArcTolerance = to_fixed(options.tolerance);
     offset.MiterLimit = options.miter_limit;
     offset.Execute(paths, to_fixed(options.distance));
     std::vector<std::shared_ptr<const Polygon_2>> pss;

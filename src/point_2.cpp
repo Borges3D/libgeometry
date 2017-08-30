@@ -31,13 +31,13 @@ is_approximately_equal(const Point_2& p1, const Point_2& p2)
     if (!is_approximately_equal(p1.x(), p2.x())) {
         return false;
     }
-    return is_approximately_equal(p1.x(), p2.x());
+    return is_approximately_equal(p1.y(), p2.y());
 }
 
 const Vector_2
 operator-(const Point_2& p1, const Point_2& p2)
 {
-    return Vector_2(p1.x() - p2.x(), p2.y() - p1.y());
+    return Vector_2(p1.x() - p2.x(), p1.y() - p2.y());
 }
 
 } // namespace Geometry

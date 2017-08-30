@@ -1,6 +1,7 @@
 #ifndef GEOMETRY_SISL_UTILITIES_H
 #define GEOMETRY_SISL_UTILITIES_H
 
+#include <sisl.h>
 #include <vector>
 
 namespace Geometry {

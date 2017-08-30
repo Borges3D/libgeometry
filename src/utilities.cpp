@@ -1,10 +1,12 @@
 #include "utilities.h"
+#include <cassert>
 #include <cmath>
 
 namespace Geometry {
 
 namespace {
 
+constexpr double absolute_epsilon = 1E-6;
 constexpr int fractional_bits = 32;
 constexpr double relative_epsilon = 1E-6;
 
@@ -13,18 +15,25 @@ constexpr double relative_epsilon = 1E-6;
 const bool
 is_approximately_equal(const double x1, const double x2)
 {
-    const double d = std::abs(x2 - x1);
-    if (d < absolute_epsilon) {
-        return true;
-    }
-    const double d1 = std::abs(x1);
-    const double d2 = std::abs(x2);
-    if (d1 < d2) {
-        return std::abs(d1) / d < relative_epsilon;
-    }
-    else {
-        return std::abs(d2) / d < relative_epsilon;
-    }
+    const double abs_delta_x = std::abs(x1 - x2);
+    return abs_delta_x < absolute_epsilon ||
+           (abs_delta_x / std::abs(x1) < relative_epsilon &&
+            abs_delta_x / std::abs(x2) < relative_epsilon);
+}
+
+const bool
+is_definitely_less(const double x1, const double x2)
+{
+    const double delta_x = x1 - x2;
+    return delta_x <= -absolute_epsilon &&
+           (delta_x / std::abs(x1) <= -relative_epsilon ||
+            delta_x / std::abs(x2) <= -relative_epsilon);
+}
+
+const double
+lerp(const double x1, const double x2, const double t)
+{
+    return (1 - t) * x1 + t * x2;
 }
 
 const std::int64_t
