@@ -7,17 +7,24 @@ SET(GEOMETRY_SOURCES
     circle_2.cpp
     clipper_utilities.cpp
     closed_curve_2.cpp
+    closed_curve_3.cpp
     curve.cpp
     curve_2.cpp
+    curve_3.cpp
     offset_options.cpp
     open_curve_2.cpp
+    open_curve_3.cpp
     point_2.cpp
+    point_3.cpp
     polygon_2.cpp
+    polygon_3.cpp
     polyline_2.cpp
+    polyline_3.cpp
     rectangle_2.cpp
     sisl_utilities.cpp
     utilities.cpp
     vector_2.cpp
+    vector_3.cpp
 )
 SET(GEOMETRY_INCLUDE_DIRS
     ${CLIPPER_INCLUDE_DIR}

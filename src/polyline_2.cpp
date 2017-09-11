@@ -50,6 +50,16 @@ Polyline_2::Polyline_2(const std::vector<Point_2> points)
 #endif // !NDEBUG
 }
 
+const double
+length(const Polyline_2& ps)
+{
+    double len = 0.0;
+    for (std::size_t index = 1; index < ps.size(); ++index) {
+        len += distance(ps[index - 1], ps[index]);
+    }
+    return len;
+}
+
 const std::vector<std::shared_ptr<const Polygon_2>>
 offset(const Polyline_2& ps, const Offset_options& options)
 {
@@ -70,16 +80,14 @@ offset(const Polyline_2& ps, const Offset_options& options)
 const std::vector<double>
 parameters(const Polyline_2& ps)
 {
+    const double len = length(ps);
     std::vector<double> ts;
     ts.reserve(ps.size());
-    double dsum = 0.0;
-    ts.push_back(dsum);
+    double d = 0.0;
+    ts.push_back(0.0);
     for (std::size_t index = 1; index < ps.size(); ++index) {
-        dsum += distance(ps[index - 1], ps[index]);
-        ts.push_back(dsum);
-    }
-    for (double& t : ts) {
-        t /= dsum;
+        d += distance(ps[index - 1], ps[index]);
+        ts.push_back(d / len);
     }
     return ts;
 }

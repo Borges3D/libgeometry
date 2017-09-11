@@ -18,12 +18,34 @@ draw(const Polygon_2& ps)
 }
 
 void
+draw(const Polygon_3& ps)
+{
+    glBegin(GL_LINE_LOOP);
+    for (std::size_t index = 0; index < ps.size(); ++index) {
+        const Point_3& p = ps[index];
+        glVertex3f(p.x(), p.y(), p.z());
+    }
+    glEnd();
+}
+
+void
 draw(const Polyline_2& ps)
 {
     glBegin(GL_LINE_STRIP);
     for (std::size_t index = 0; index < ps.size(); ++index) {
         const Point_2& p = ps[index];
         glVertex2f(p.x(), p.y());
+    }
+    glEnd();
+}
+
+void
+draw(const Polyline_3& ps)
+{
+    glBegin(GL_LINE_STRIP);
+    for (std::size_t index = 0; index < ps.size(); ++index) {
+        const Point_3& p = ps[index];
+        glVertex3f(p.x(), p.y(), p.z());
     }
     glEnd();
 }
@@ -41,15 +63,50 @@ draw(const Open_curve_2& c)
 }
 
 void
+draw(const Curve_2& c)
+{
+    if (c.is_closed()) {
+        draw(c.as_closed_curve_2());
+    }
+    else {
+        draw(c.as_open_curve_2());
+    }
+}
+
+void
+draw(const Closed_curve_3& c)
+{
+    draw(*c.to_polygon_3());
+}
+
+void
+draw(const Open_curve_3& c)
+{
+    draw(*c.to_polyline_3());
+}
+
+void
+draw(const Curve_3& c)
+{
+    if (c.is_closed()) {
+        draw(c.as_closed_curve_3());
+    }
+    else {
+        draw(c.as_open_curve_3());
+    }
+}
+
+
+void
 draw(const Circle_2& c)
 {
-    draw(*Curve::create(c));
+    draw(*Closed_curve_2::create(c));
 }
 
 void
 draw(const Rectangle_2& r)
 {
-    draw(*Curve::create(r));
+    draw(*Closed_curve_2::create(r));
 }
 
 std::shared_ptr<const Open_curve_2> c;
@@ -65,7 +122,7 @@ display(void)
         draw(*c);
         for (std::shared_ptr<const Closed_curve_2> c : offset(*c, 0.1)) {
             glColor3f(0.0, 0.0, 1.0);
-            draw(*c);
+            draw(*Closed_curve_3::fit(3, *c->to_curve_3()->as_closed_curve_3().to_polygon_3()));
         }
     }
     glutSwapBuffers();
@@ -82,7 +139,7 @@ generate(void)
                                  1.5 * (random() % 100) / 100 - 0.75));
         }
         try {
-            c = Curve_2::fit_open(3, ps);
+            c = Open_curve_2::fit(3, ps);
         }
         catch (...) {}
     }

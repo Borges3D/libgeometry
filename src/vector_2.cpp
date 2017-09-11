@@ -33,6 +33,27 @@ dot_product(const Vector_2& v1, const Vector_2& v2)
     return v1.x() * v2.x() + v1.y() * v2.y();
 }
 
+const bool
+is_approximately_equal(const Vector_2& v1, const Vector_2& v2)
+{
+    if (!is_approximately_equal(v1.x(), v2.x())) {
+        return false;
+    }
+    return is_approximately_equal(v1.y(), v2.y());
+}
+
+const bool
+is_definitely_less(const Vector_2& v1, const Vector_2& v2)
+{
+    if (is_definitely_less(v1.x(), v2.x())) {
+        return true;
+    }
+    if (is_definitely_less(v2.x(), v1.x())) {
+        return false;
+    }
+    return is_definitely_less(v1.y(), v2.y());
+}
+
 const double
 length(const Vector_2& v)
 {
@@ -52,19 +73,43 @@ normalize(const Vector_2& v)
 }
 
 const Vector_2
+operator+(const Vector_2& v)
+{
+    return Vector_2(+v.x(), +v.y());
+}
+
+const Vector_2
 operator+(const Vector_2& v1, const Vector_2& v2)
 {
     return Vector_2(v1.x() + v2.x(), v1.y() + v2.y());
 }
 
 const Vector_2
-operator*(const Vector_2& v, double c)
+operator-(const Vector_2& v)
+{
+    return Vector_2(-v.x(), -v.y());
+}
+
+const Vector_2
+operator-(const Vector_2& v1, const Vector_2& v2)
+{
+    return Vector_2(v1.x() - v1.x(), v1.y() + v2.y());
+}
+
+const Vector_2
+operator*(const Vector_2& v, const double c)
 {
     return Vector_2(v.x() * c, v.y() * c);
 }
 
 const Vector_2
-operator/(const Vector_2& v, double c)
+operator*(const double c, const Vector_2& v)
+{
+    return Vector_2(c * v.x(), c * v.y());
+}
+
+const Vector_2
+operator/(const Vector_2& v, const double c)
 {
     return Vector_2(v.x() / c, v.y() / c);
 }

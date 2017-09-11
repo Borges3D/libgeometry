@@ -87,6 +87,17 @@ clip(const Clip_type type,
     return pss;
 }
 
+const double
+length(const Polygon_2& ps)
+{
+    double len = 0.0;
+    for (std::size_t index = 1; index < ps.size(); ++index) {
+        len += distance(ps[index - 1], ps[index]);
+    }
+    len += distance(ps[ps.size() - 1], ps[0]);
+    return len;
+}
+
 const std::vector<std::shared_ptr<const Polygon_2>>
 offset(const Polygon_2& ps, const Offset_options& options)
 {
@@ -107,17 +118,14 @@ offset(const Polygon_2& ps, const Offset_options& options)
 const std::vector<double>
 parameters(const Polygon_2& ps)
 {
+    const double len = length(ps);
     std::vector<double> ts;
     ts.reserve(ps.size());
-    double dsum = 0.0;
-    ts.push_back(dsum);
+    double d = 0.0;
+    ts.push_back(0.0);
     for (std::size_t index = 1; index < ps.size(); ++index) {
-        dsum += distance(ps[index - 1], ps[index]);
-        ts.push_back(dsum);
-    }
-    dsum += distance(ps[ps.size() - 1], ps[0]);
-    for (double& t : ts) {
-        t /= dsum;
+        d += distance(ps[index - 1], ps[index]);
+        ts.push_back(d / len);
     }
     return ts;
 }

@@ -23,6 +23,7 @@ private:
     const std::vector<Point_2> points_;
 };
 
+const double length(const Polyline_2& ps);
 const std::vector<std::shared_ptr<const Polygon_2>>
 offset(const Polyline_2& ps, const Offset_options& options);
 const std::vector<double> parameters(const Polyline_2& ps);

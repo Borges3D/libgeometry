@@ -1,7 +1,7 @@
 #ifndef GEOMETRY_RECTANGLE_2_H
 #define GEOMETRY_RECTANGLE_2_H
 
-#include "point_2.h"
+#include "polygon_2.h"
 
 namespace Geometry {
 
@@ -15,6 +15,8 @@ private:
     const Point_2 start_;
     const Point_2 end_;
 };
+
+std::shared_ptr<const Polygon_2> to_polygon_2(const Rectangle_2& r);
 
 } // namespace Geometry
 

@@ -31,6 +31,7 @@ const std::vector<std::shared_ptr<const Polygon_2>>
 clip(const Clip_type type,
      const std::vector<std::reference_wrapper<const Polygon_2>>& pss1,
      const std::vector<std::reference_wrapper<const Polygon_2>>& pss2);
+const double length(const Polygon_2& ps);
 const std::vector<std::shared_ptr<const Polygon_2>>
 offset(const Polygon_2& ps, const Offset_options& options);
 const std::vector<double> parameters(const Polygon_2& ps);

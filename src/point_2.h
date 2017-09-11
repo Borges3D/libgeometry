@@ -18,7 +18,11 @@ private:
 
 const double distance(const Point_2& p1, const Point_2& p2);
 const bool is_approximately_equal(const Point_2& p1, const Point_2& p2);
+const bool is_definitely_less(const Point_2& p1, const Point_2& p2);
+const Point_2 operator+(const Point_2& p, const Vector_2& v);
+const Point_2 operator-(const Point_2& p, const Vector_2& v);
 const Vector_2 operator-(const Point_2& p1, const Point_2& p2);
+const double squared_distance(const Point_2& p1, const Point_2& p2);
 
 } // namespace Geometry
 

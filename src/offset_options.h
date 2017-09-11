@@ -20,8 +20,8 @@ struct Offset_options {
     Cap_type cap_type = Cap_type::round;
     Join_type join_type = Join_type::round;
     double miter_limit = 2.0;
-    double smoothness = 0.5;
-    double tolerance = 1E-3;
+    double smoothness = 0.9;
+    double tolerance = 1E-2;
 };
 
 #endif // GEOMETRY_OFFSET_OPTIONS_H
