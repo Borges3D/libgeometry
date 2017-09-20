@@ -14,13 +14,13 @@ class Open_curve_2;
 
 class Curve_2 : public Curve {
 public:
-    const Point_2 control(const std::size_t index) const;
     const Closed_curve_2& as_closed_curve_2() const;
     const Open_curve_2& as_open_curve_2() const;
+    const Point_2 control(const std::size_t index) const;
     std::shared_ptr<const Curve_3> to_curve_3() const;
 
 protected:
-    Curve_2(std::unique_ptr<SISLCurve, decltype(&freeCurve)> curve);
+    Curve_2(Internal::Unique_sisl_curve_ptr curve);
 };
 
 std::vector<std::shared_ptr<const Curve_2>>

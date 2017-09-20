@@ -36,7 +36,7 @@ Curve_3::as_open_curve_3() const
     return static_cast<const Open_curve_3&>(*this);
 }
 
-Curve_3::Curve_3(std::unique_ptr<SISLCurve, decltype(&freeCurve)> curve)
+Curve_3::Curve_3(Internal::Unique_sisl_curve_ptr curve)
     : Curve(std::move(curve))
 {
     assert(dimension() == 3);

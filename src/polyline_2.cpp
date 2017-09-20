@@ -1,24 +1,9 @@
 #include "polyline_2.h"
 #include "clipper_utilities.h"
-#include "utilities.h"
 #include <cassert>
 #include <utility>
 
 namespace Geometry {
-
-namespace {
-
-ClipperLib::Path
-to_path(const Polyline_2& ps)
-{
-    ClipperLib::Path path;
-    for (std::size_t index = 0; index < ps.size(); ++index) {
-        path.push_back(to_int_point(ps[index]));
-    }
-    return path;
-}
-
-} // namespace
 
 std::shared_ptr<const Polyline_2>
 Polyline_2::create(const std::vector<Point_2> points)
@@ -64,15 +49,16 @@ const std::vector<std::shared_ptr<const Polygon_2>>
 offset(const Polyline_2& ps, const Offset_options& options)
 {
     ClipperLib::ClipperOffset offset;
-    offset.AddPath(to_path(ps), to_join_type(options.join_type),
-                   to_end_type(options.cap_type));
+    offset.AddPath(Internal::to_path(ps),
+                   Internal::to_join_type(options.join_type),
+                   Internal::to_end_type(options.cap_type));
     ClipperLib::Paths paths;
-    offset.ArcTolerance = to_fixed(options.tolerance);
+    offset.ArcTolerance = Internal::to_fixed(options.tolerance);
     offset.MiterLimit = options.miter_limit;
-    offset.Execute(paths, to_fixed(options.distance));
+    offset.Execute(paths, Internal::to_fixed(options.distance));
     std::vector<std::shared_ptr<const Polygon_2>> pss;
     for (const ClipperLib::Path& path : paths) {
-        pss.push_back(to_polygon_2(path));
+        pss.push_back(Internal::to_polygon_2(path));
     }
     return pss;
 }

@@ -15,11 +15,17 @@ public:
     fit(const std::size_t order, const std::vector<Point_2>& ps);
     static std::shared_ptr<const Open_curve_2>
     fit(const std::size_t order, const Polyline_2& ps, const double smoothness);
+    std::tuple<std::shared_ptr<const Open_curve_2>,
+               std::shared_ptr<const Open_curve_2>>
+    split(const double u) const;
     std::shared_ptr<const Polyline_2>
     to_polyline_2(const double tolerance = 1E-3) const;
 
 private:
-    Open_curve_2(std::unique_ptr<SISLCurve, decltype(&freeCurve)> curve);
+    friend class Closed_curve_2;
+    friend class Curve_2;
+
+    Open_curve_2(Internal::Unique_sisl_curve_ptr curve);
 };
 
 std::vector<std::shared_ptr<const Closed_curve_2>>

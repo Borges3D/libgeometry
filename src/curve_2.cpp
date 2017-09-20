@@ -2,10 +2,26 @@
 #include "closed_curve_2.h"
 #include "curve_3.h"
 #include "open_curve_2.h"
+#include "utilities.h"
 #include <cassert>
+#include <cstdlib>
 #include <utility>
 
 namespace Geometry {
+
+const Closed_curve_2&
+Curve_2::as_closed_curve_2() const
+{
+    assert(is_closed());
+    return static_cast<const Closed_curve_2&>(*this);
+}
+
+const Open_curve_2&
+Curve_2::as_open_curve_2() const
+{
+    assert(!is_closed());
+    return static_cast<const Open_curve_2&>(*this);
+}
 
 const Point_2
 Curve_2::control(const std::size_t index) const
@@ -23,25 +39,9 @@ Curve_2::control(const std::size_t index) const
     }
 }
 
-const Closed_curve_2&
-Curve_2::as_closed_curve_2() const
-{
-    assert(is_closed());
-    return static_cast<const Closed_curve_2&>(*this);
-}
-
-const Open_curve_2&
-Curve_2::as_open_curve_2() const
-{
-    assert(!is_closed());
-    return static_cast<const Open_curve_2&>(*this);
-}
-
 std::shared_ptr<const Curve_3>
 Curve_2::to_curve_3() const
 {
-    const int number = curve_->in;
-    const int order = curve_->ik;
     const std::size_t knots_size = curve_->in + curve_->ik;
     std::unique_ptr<double[], decltype(&std::free)> knots(
         reinterpret_cast<double*>(std::malloc(knots_size * sizeof(double))),
@@ -79,18 +79,20 @@ Curve_2::to_curve_3() const
             *dst++ = 0.0;
         }
     }
+    const int number = curve_->in;
+    const int order = curve_->ik;
+    double* knots_ptr = knots.release();
+    double* coef_ptr = coef.release();
     const int kind = curve_->ikind;
     constexpr int dim = 3;
     constexpr int copy = 2;
-    std::unique_ptr<SISLCurve, decltype(&freeCurve)> curve(
-        newCurve(number, order, knots.release(), coef.release(), kind, dim,
-                 copy),
-        &freeCurve);
+    Internal::Unique_sisl_curve_ptr curve(
+        newCurve(number, order, knots_ptr, coef_ptr, kind, dim, copy));
     curve->cuopen = curve_->cuopen;
     return std::shared_ptr<const Curve_3>(new Curve_3(std::move(curve)));
 }
 
-Curve_2::Curve_2(std::unique_ptr<SISLCurve, decltype(&freeCurve)> curve)
+Curve_2::Curve_2(Internal::Unique_sisl_curve_ptr curve)
     : Curve(std::move(curve))
 {
     assert(dimension() == 2);

@@ -7,7 +7,6 @@ namespace Geometry {
 namespace {
 
 constexpr double absolute_epsilon = 1E-6;
-constexpr int fractional_bits = 32;
 constexpr double relative_epsilon = 1E-6;
 
 } // namespace
@@ -34,18 +33,6 @@ const double
 lerp(const double x1, const double x2, const double t)
 {
     return (1 - t) * x1 + t * x2;
-}
-
-const std::int64_t
-to_fixed(const double x)
-{
-    return std::round(x * (1ull << fractional_bits));
-}
-
-const double
-to_float(const std::int64_t x)
-{
-    return static_cast<double>(x) / (1ull << fractional_bits);
 }
 
 } // namespace Geometry

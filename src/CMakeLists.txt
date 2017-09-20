@@ -22,6 +22,8 @@ SET(GEOMETRY_SOURCES
     polyline_3.cpp
     rectangle_2.cpp
     sisl_utilities.cpp
+    unique_malloc_ptr.cpp
+    unique_sisl_curve_ptr.cpp
     utilities.cpp
     vector_2.cpp
     vector_3.cpp

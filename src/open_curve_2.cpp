@@ -3,10 +3,12 @@
 #include "polygon_2.h"
 #include "polyline_2.h"
 #include "sisl_utilities.h"
+#include "unique_malloc_ptr.h"
 #include "utilities.h"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdlib>
 #include <utility>
 
 namespace Geometry {
@@ -14,8 +16,6 @@ namespace Geometry {
 std::shared_ptr<const Open_curve_2>
 Open_curve_2::create(const Polyline_2& ps)
 {
-    const int number = ps.size();
-    constexpr int order = 2;
     const std::vector<double> ts = parameters(ps);
     std::unique_ptr<double[], decltype(&std::free)> knots(
         reinterpret_cast<double*>(
@@ -42,25 +42,27 @@ Open_curve_2::create(const Polyline_2& ps)
         *dst++ = p.x();
         *dst++ = p.y();
     }
+    const int number = ps.size();
+    constexpr int order = 2;
+    double* knots_ptr = knots.release();
+    double* coef_ptr = coef.release();
     constexpr int kind = 1;
     constexpr int dim = 2;
     constexpr int copy = 2;
-    std::unique_ptr<SISLCurve, decltype(&freeCurve)> curve_(
-        newCurve(number, order, knots.release(), coef.release(), kind, dim,
-                 copy),
-        &freeCurve);
-    if (!curve_) {
+    Internal::Unique_sisl_curve_ptr curve(
+        newCurve(number, order, knots_ptr, coef_ptr, kind, dim, copy));
+    if (!curve) {
         throw std::runtime_error("");
     }
     return std::shared_ptr<const Open_curve_2>(
-        new Open_curve_2(std::move(curve_)));
+        new Open_curve_2(std::move(curve)));
 }
 
 std::shared_ptr<const Open_curve_2>
 Open_curve_2::fit(const std::size_t order, const std::vector<Point_2>& ps)
 {
     return std::shared_ptr<const Open_curve_2>(
-        new Open_curve_2(Geometry::fit(1, order, ps)));
+        new Open_curve_2(Internal::fit(1, order, ps)));
 }
 
 std::shared_ptr<const Open_curve_2>
@@ -92,37 +94,63 @@ Open_curve_2::fit(const std::size_t order, const Polyline_2& ps,
             derivate.push_back(0.0);
         }
     }
+    double* point_ptr = point.data();
+    double* derivate_ptr = derivate.data();
     const int numpnt = ps.size();
     constexpr int dim = 2;
     constexpr int typepar = 1;
-    SISLCurve* curve_ = nullptr;
+    SISLCurve* curve_ptr = nullptr;
     int stat = 0;
-    s1380(point.data(), derivate.data(), numpnt, dim, typepar, &curve_,
-          &stat);
+    s1380(point_ptr, derivate_ptr, numpnt, dim, typepar, &curve_ptr, &stat);
     if (stat < 0) {
         throw std::runtime_error("");
     }
-    return std::shared_ptr<const Open_curve_2>(new Open_curve_2(
-        std::unique_ptr<SISLCurve, decltype(&freeCurve)>(curve_, &freeCurve)));
+    return std::shared_ptr<const Open_curve_2>(
+        new Open_curve_2(Internal::Unique_sisl_curve_ptr(curve_ptr)));
+}
+
+std::tuple<std::shared_ptr<const Open_curve_2>,
+           std::shared_ptr<const Open_curve_2>>
+Open_curve_2::split(const double u) const
+{
+    std::tuple<Internal::Unique_sisl_curve_ptr, Internal::Unique_sisl_curve_ptr>
+        rcnew1_rcnew2 = Internal::split(curve_.get(), u);
+    return std::make_tuple(std::shared_ptr<const Open_curve_2>(new Open_curve_2(
+                               std::move(std::get<0>(rcnew1_rcnew2)))),
+                           std::shared_ptr<const Open_curve_2>(new Open_curve_2(
+                               std::move(std::get<1>(rcnew1_rcnew2)))));
 }
 
 std::shared_ptr<const Polyline_2>
 Open_curve_2::to_polyline_2(const double tolerance) const
 {
+    SISLCurve* curve_ptr = curve_.get();
     const double epsge = tolerance;
-    double* points_ = nullptr;
+    double* points_ptr = nullptr;
     int numpoints = 0;
     int stat = 0;
-    s1613(curve_.get(), epsge, &points_, &numpoints, &stat);
+    s1613(curve_ptr, epsge, &points_ptr, &numpoints, &stat);
     if (stat < 0) {
         throw std::runtime_error("");
     }
-    std::unique_ptr<double[], decltype(&std::free)> points(points_, &std::free);
-    return Polyline_2::create(to_points_2(false, numpoints, points.get()));
+    Internal::Unique_malloc_ptr<double[]> points(points_ptr);
+    const double* src = points.get();
+    std::vector<Point_2> ps;
+    const double x = *src++;
+    const double y = *src++;
+    ps.push_back(Point_2(x, y));
+    for (std::size_t index = 1; index < numpoints; ++index) {
+        const double x = *src++;
+        const double y = *src++;
+        Point_2 p(x, y);
+        if (!is_approximately_equal(p, ps.back())) {
+            ps.push_back(p);
+        }
+    }
+    return Polyline_2::create(ps);
 }
 
-Open_curve_2::Open_curve_2(
-    std::unique_ptr<SISLCurve, decltype(&freeCurve)> curve)
+Open_curve_2::Open_curve_2(Internal::Unique_sisl_curve_ptr curve)
     : Curve_2(std::move(curve))
 {
     assert(!is_closed());

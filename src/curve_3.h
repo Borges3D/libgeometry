@@ -18,7 +18,7 @@ public:
 protected:
     friend class Curve_2;
 
-    Curve_3(std::unique_ptr<SISLCurve, decltype(&freeCurve)> curve);
+    Curve_3(Internal::Unique_sisl_curve_ptr curve);
 };
 
 } // namespace Geometry

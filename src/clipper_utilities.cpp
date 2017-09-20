@@ -1,9 +1,30 @@
 #include "clipper_utilities.h"
-#include "utilities.h"
 #include "polygon_2.h"
+#include "polyline_2.h"
 #include <cmath>
 
 namespace Geometry {
+
+namespace Internal {
+
+namespace {
+
+constexpr int fractional_bits = 32;
+
+} // namespace
+
+const ClipperLib::ClipType
+to_clip_type(const Clip_type type)
+{
+    switch (type) {
+    case Clip_type::Difference:
+        return ClipperLib::ctDifference;
+    case Clip_type::Intersection:
+        return ClipperLib::ctIntersection;
+    case Clip_type::Union:
+        return ClipperLib::ctUnion;
+    }
+}
 
 const ClipperLib::EndType
 to_end_type(const Cap_type type)
@@ -16,6 +37,24 @@ to_end_type(const Cap_type type)
     case Cap_type::square:
         return ClipperLib::etOpenSquare;
     }
+}
+
+const std::int64_t
+to_fixed(const double x)
+{
+    return std::round(x * (1ull << fractional_bits));
+}
+
+const double
+to_float(const std::int64_t x)
+{
+    return static_cast<double>(x) / (1ull << fractional_bits);
+}
+
+ClipperLib::IntPoint
+to_int_point(const Point_2& p)
+{
+    return ClipperLib::IntPoint(to_fixed(p.x()), to_fixed(p.y()));
 }
 
 const ClipperLib::JoinType
@@ -31,10 +70,25 @@ to_join_type(const Join_type type)
     }
 }
 
-ClipperLib::IntPoint
-to_int_point(const Point_2& p)
+ClipperLib::Path
+to_path(const Polygon_2& ps)
 {
-    return ClipperLib::IntPoint(to_fixed(p.x()), to_fixed(p.y()));
+    ClipperLib::Path path;
+    for (std::size_t index = 0; index < ps.size(); ++index) {
+        path.push_back(to_int_point(ps[index]));
+    }
+    path.push_back(to_int_point(ps[0]));
+    return path;
+}
+
+ClipperLib::Path
+to_path(const Polyline_2& ps)
+{
+    ClipperLib::Path path;
+    for (std::size_t index = 0; index < ps.size(); ++index) {
+        path.push_back(to_int_point(ps[index]));
+    }
+    return path;
 }
 
 Point_2
@@ -60,5 +114,7 @@ to_polygon_2(const ClipperLib::Path& ps)
     }
     return Polygon_2::create(std::move(ps_));
 }
+
+} // namespace Internal
 
 } // namespace Geometry

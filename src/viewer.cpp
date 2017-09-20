@@ -1,6 +1,7 @@
 #include "geometry.h"
 #include <GLUT/glut.h>
 #include <OpenGL/gl.h>
+#include <cstdlib>
 
 using namespace Geometry;
 
@@ -121,8 +122,13 @@ display(void)
         glColor3f(0.0, 1.0, 0.0);
         draw(*c);
         for (std::shared_ptr<const Closed_curve_2> c : offset(*c, 0.1)) {
+            std::tuple<std::shared_ptr<const Open_curve_2>,
+                       std::shared_ptr<const Open_curve_2>>
+                c1c2 = c->split(c->u_min())->split((c->u_min() + c->u_max()) / 2.0);
             glColor3f(0.0, 0.0, 1.0);
-            draw(*Closed_curve_3::fit(3, *c->to_curve_3()->as_closed_curve_3().to_polygon_3()));
+            draw(*std::get<0>(c1c2));
+            glColor3f(1.0, 0.0, 1.0);
+            draw(*std::get<1>(c1c2));
         }
     }
     glutSwapBuffers();

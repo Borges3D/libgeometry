@@ -1,7 +1,8 @@
 #ifndef GEOMETRY_SISL_UTILITIES_H
 #define GEOMETRY_SISL_UTILITIES_H
 
-#include <sisl.h>
+#include "unique_sisl_curve_ptr.h"
+#include <tuple>
 #include <vector>
 
 namespace Geometry {
@@ -9,14 +10,16 @@ namespace Geometry {
 class Point_2;
 class Point_3;
 
-std::unique_ptr<SISLCurve, decltype(&freeCurve)>
+namespace Internal {
+
+Unique_sisl_curve_ptr
 fit(const int iopen, const int ik, const std::vector<Point_2>& ps);
-std::unique_ptr<SISLCurve, decltype(&freeCurve)>
+Unique_sisl_curve_ptr
 fit(const int iopen, const int ik, const std::vector<Point_3>& ps);
-const std::vector<Point_2>
-to_points_2(const bool is_closed, const std::size_t size, const double* points);
-const std::vector<Point_3>
-to_points_3(const bool is_closed, const std::size_t size, const double* points);
+std::tuple<Unique_sisl_curve_ptr, Unique_sisl_curve_ptr>
+split(SISLCurve* pc1_ptr, const double apar);
+
+} // namespace Internal
 
 } // namespace Geometry
 

@@ -1,18 +1,13 @@
 #ifndef GEOMETRY_POLYGON_2_H
 #define GEOMETRY_POLYGON_2_H
 
+#include "clip_type.h"
 #include "point_2.h"
 #include "offset_options.h"
 #include <memory>
 #include <vector>
 
 namespace Geometry {
-
-enum class Clip_type {
-    Difference,
-    Intersection,
-    Union
-};
 
 class Polygon_2 {
 public:

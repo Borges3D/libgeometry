@@ -1,17 +1,10 @@
 #ifndef GEOMETRY_OFFSET_OPTIONS_H
 #define GEOMETRY_OFFSET_OPTIONS_H
 
-enum class Cap_type {
-    butt,
-    round,
-    square
-};
+#include "cap_type.h"
+#include "join_type.h"
 
-enum class Join_type {
-    miter,
-    round,
-    square
-};
+namespace Geometry {
 
 struct Offset_options {
     Offset_options(double distance);
@@ -23,5 +16,7 @@ struct Offset_options {
     double smoothness = 0.9;
     double tolerance = 1E-2;
 };
+
+} // namespace Geometry
 
 #endif // GEOMETRY_OFFSET_OPTIONS_H
