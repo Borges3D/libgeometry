@@ -18,8 +18,6 @@ public:
     std::tuple<std::shared_ptr<const Open_curve_2>,
                std::shared_ptr<const Open_curve_2>>
     split(const double u) const;
-    std::shared_ptr<const Polyline_2>
-    to_polyline_2(const double tolerance = 1E-3) const;
 
 private:
     friend class Closed_curve_2;
@@ -30,6 +28,8 @@ private:
 
 std::vector<std::shared_ptr<const Closed_curve_2>>
 offset(const Open_curve_2& c, const Offset_options& options);
+std::shared_ptr<const Polyline_2>
+to_polyline_2(const Open_curve_2& c, const double tolerance = 1E-3);
 
 } // namespace Geometry
 

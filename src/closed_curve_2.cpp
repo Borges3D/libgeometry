@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <stdexcept>
 
 namespace Geometry {
 
@@ -38,13 +39,13 @@ Closed_curve_2::create(const Rectangle_2& r)
     const Point_2& end = r.end();
     const double x2 = end.x();
     const double y2 = end.y();
-    return Closed_curve_2::create(*Geometry::to_polygon_2(r));
+    return Closed_curve_2::create(*to_polygon_2(r));
 }
 
 std::shared_ptr<const Closed_curve_2>
 Closed_curve_2::create(const Polygon_2& ps)
 {
-    const std::vector<double> ts = parameters(ps);
+    const std::vector<double> ts = Geometry::parameters(ps);
     std::unique_ptr<double[], decltype(&std::free)> knots(
         reinterpret_cast<double*>(
             std::malloc((ts.size() + 2) * sizeof(double))),
@@ -172,41 +173,12 @@ Closed_curve_2::split(const double u) const
     }
 }
 
-std::shared_ptr<const Polygon_2>
-Closed_curve_2::to_polygon_2(const double tolerance) const
-{
-    SISLCurve* curve_ptr = curve_.get();
-    const double epsge = tolerance;
-    double* points_ptr = nullptr;
-    int numpoints = 0;
-    int stat = 0;
-    s1613(curve_ptr, epsge, &points_ptr, &numpoints, &stat);
-    if (stat < 0) {
-        throw std::runtime_error("");
-    }
-    Internal::Unique_malloc_ptr<double> points(points_ptr);
-    const double* src = points.get();
-    std::vector<Point_2> ps;
-    const double x = *src++;
-    const double y = *src++;
-    ps.push_back(Point_2(x, y));
-    for (std::size_t index = 1; index < numpoints - 1; ++index) {
-        const double x = *src++;
-        const double y = *src++;
-        Point_2 p(x, y);
-        if (!is_approximately_equal(p, ps.back())) {
-            ps.push_back(p);
-        }
-    }
-    return Polygon_2::create(ps);
-}
-
 std::vector<std::shared_ptr<const Closed_curve_2>>
 offset(const Closed_curve_2& c, const Offset_options& options)
 {
     std::vector<std::shared_ptr<const Closed_curve_2>> cs;
     for (const std::shared_ptr<const Polygon_2>& ps :
-         offset(*c.to_polygon_2(options.tolerance), options)) {
+         offset(*to_polygon_2(c, options.tolerance), options)) {
         cs.push_back(Closed_curve_2::fit(c.order(), *ps, options.smoothness));
     }
     return cs;
@@ -216,6 +188,21 @@ Closed_curve_2::Closed_curve_2(Internal::Unique_sisl_curve_ptr curve)
     : Curve_2(std::move(curve))
 {
     assert(is_closed());
+}
+
+std::shared_ptr<const Polygon_2>
+to_polygon_2(const Closed_curve_2& c, const double tolerance)
+{
+    std::vector<double> us = c.parameters(tolerance);
+    std::vector<Point_2> ps;
+    ps.push_back(c.point(us[0]));
+    for (std::size_t index = 1; index < us.size() - 1; ++index) {
+        Point_2 p = c.point(us[index]);
+        if (!is_approximately_equal(p, ps.back())) {
+            ps.push_back(p);
+        }
+    }
+    return Polygon_2::create(ps);
 }
 
 } // namespace Geometry

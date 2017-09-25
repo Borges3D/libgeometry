@@ -2,9 +2,11 @@
 #include "closed_curve_2.h"
 #include "curve_3.h"
 #include "open_curve_2.h"
+#include "unique_malloc_ptr.h"
 #include "utilities.h"
 #include <cassert>
 #include <cstdlib>
+#include <stdexcept>
 #include <utility>
 
 namespace Geometry {
@@ -37,6 +39,22 @@ Curve_2::control(const std::size_t index) const
         const std::size_t base = index * 3;
         return Point_2(rcoef[base + 0], rcoef[base + 1]);
     }
+}
+
+const Point_2
+Curve_2::point(const double u) const
+{
+    SISLCurve* curve_ptr = curve_.get();
+    constexpr int der = 0;
+    const double parvalue = u;
+    int leftknot = 0;
+    double derive[2] = {0.0, 0.0};
+    int stat = 0;
+    s1227(curve_ptr, der, parvalue, &leftknot, derive, &stat);
+    if (stat < 0) {
+        throw std::runtime_error("");
+    }
+    return Point_2(derive[0], derive[1]);
 }
 
 std::shared_ptr<const Curve_3>

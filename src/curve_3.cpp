@@ -2,9 +2,24 @@
 #include "closed_curve_3.h"
 #include "open_curve_3.h"
 #include <cassert>
+#include <stdexcept>
 #include <utility>
 
 namespace Geometry {
+
+const Closed_curve_3&
+Curve_3::as_closed_curve_3() const
+{
+    assert(is_closed());
+    return static_cast<const Closed_curve_3&>(*this);
+}
+
+const Open_curve_3&
+Curve_3::as_open_curve_3() const
+{
+    assert(!is_closed());
+    return static_cast<const Open_curve_3&>(*this);
+}
 
 const Point_3
 Curve_3::control(const std::size_t index) const
@@ -22,18 +37,20 @@ Curve_3::control(const std::size_t index) const
     }
 }
 
-const Closed_curve_3&
-Curve_3::as_closed_curve_3() const
+const Point_3
+Curve_3::point(const double u) const
 {
-    assert(is_closed());
-    return static_cast<const Closed_curve_3&>(*this);
-}
-
-const Open_curve_3&
-Curve_3::as_open_curve_3() const
-{
-    assert(!is_closed());
-    return static_cast<const Open_curve_3&>(*this);
+    SISLCurve* curve_ptr = curve_.get();
+    constexpr int der = 0;
+    const double parvalue = u;
+    int leftknot = 0;
+    double derive[3] = {0.0, 0.0, 0.0};
+    int stat = 0;
+    s1227(curve_ptr, der, parvalue, &leftknot, derive, &stat);
+    if (stat < 0) {
+        throw std::runtime_error("");
+    }
+    return Point_3(derive[0], derive[1], derive[2]);
 }
 
 Curve_3::Curve_3(Internal::Unique_sisl_curve_ptr curve)

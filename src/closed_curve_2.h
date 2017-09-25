@@ -25,8 +25,6 @@ public:
         const std::vector<Point_2>& ps);
     const bool is_periodic() const;
     std::shared_ptr<const Open_curve_2> split(const double u) const;
-    std::shared_ptr<const Polygon_2>
-    to_polygon_2(const double tolerance = 1E-3) const;
 
 private:
     Closed_curve_2(Internal::Unique_sisl_curve_ptr curve);
@@ -34,6 +32,8 @@ private:
 
 std::vector<std::shared_ptr<const Closed_curve_2>>
 offset(const Closed_curve_2& c, const Offset_options& options);
+std::shared_ptr<const Polygon_2>
+to_polygon_2(const Closed_curve_2& c, const double tolerance = 1E-3);
 
 } // namespace Geometry
 

@@ -54,13 +54,13 @@ draw(const Polyline_3& ps)
 void
 draw(const Closed_curve_2& c)
 {
-    draw(*c.to_polygon_2());
+    draw(*to_polygon_2(c));
 }
 
 void
 draw(const Open_curve_2& c)
 {
-    draw(*c.to_polyline_2());
+    draw(*to_polyline_2(c));
 }
 
 void
@@ -77,13 +77,13 @@ draw(const Curve_2& c)
 void
 draw(const Closed_curve_3& c)
 {
-    draw(*c.to_polygon_3());
+    draw(*to_polygon_3(c));
 }
 
 void
 draw(const Open_curve_3& c)
 {
-    draw(*c.to_polyline_3());
+    draw(*to_polyline_3(c));
 }
 
 void

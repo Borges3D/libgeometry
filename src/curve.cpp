@@ -1,7 +1,9 @@
 #include "curve.h"
 #include "curve_2.h"
 #include "curve_3.h"
+#include "unique_malloc_ptr.h"
 #include <cassert>
+#include <stdexcept>
 
 namespace Geometry {
 
@@ -42,6 +44,28 @@ const std::size_t
 Curve::order() const
 {
     return curve_->ik;
+}
+
+std::vector<double>
+Curve::parameters(const double tolerance) const
+{
+    SISLCurve* pc_ptr = curve_.get();
+    const double aepsge = tolerance;
+    double* gpar_ptr = nullptr;
+    int jbnpar = 0;
+    int jstat = 0;
+    s1613par(pc_ptr, aepsge, &gpar_ptr, &jbnpar, &jstat);
+    if (jstat < 0) {
+        throw std::runtime_error("");
+    }
+    Internal::Unique_malloc_ptr<double> gpar(gpar_ptr);
+    const double* src = gpar.get();
+    std::vector<double> us;
+    us.reserve(jbnpar);
+    for (std::size_t index = 0; index < jbnpar; ++index) {
+        us.push_back(*src++);
+    }
+    return us;
 }
 
 const std::size_t

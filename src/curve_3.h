@@ -11,9 +11,10 @@ class Open_curve_3;
 
 class Curve_3 : public Curve {
 public:
-    const Point_3 control(const std::size_t index) const;
     const Closed_curve_3& as_closed_curve_3() const;
     const Open_curve_3& as_open_curve_3() const;
+    const Point_3 control(const std::size_t index) const;
+    const Point_3 point(const double u) const;
 
 protected:
     friend class Curve_2;

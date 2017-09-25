@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <stdexcept>
 #include <utility>
 
 namespace Geometry {
@@ -13,7 +14,7 @@ namespace Geometry {
 std::shared_ptr<const Open_curve_3>
 Open_curve_3::create(const Polyline_3& ps)
 {
-    const std::vector<double> ts = parameters(ps);
+    const std::vector<double> ts = Geometry::parameters(ps);
     std::unique_ptr<double[], decltype(&std::free)> knots(
         reinterpret_cast<double*>(
             std::malloc((ts.size() + 2) * sizeof(double))),
@@ -124,40 +125,24 @@ Open_curve_3::split(const double u) const
                                std::move(std::get<1>(rcnew1_rcnew2)))));
 }
 
-std::shared_ptr<const Polyline_3>
-Open_curve_3::to_polyline_3(const double tolerance) const
+Open_curve_3::Open_curve_3(Internal::Unique_sisl_curve_ptr curve)
+    : Curve_3(std::move(curve))
 {
-    SISLCurve* curve_ptr = curve_.get();
-    const double epsge = tolerance;
-    double* points_ptr = nullptr;
-    int numpoints = 0;
-    int stat = 0;
-    s1613(curve_ptr, epsge, &points_ptr, &numpoints, &stat);
-    if (stat < 0) {
-        throw std::runtime_error("");
-    }
-    Internal::Unique_malloc_ptr<double[]> points(points_ptr);
-    const double* src = points.get();
+}
+
+std::shared_ptr<const Polyline_3>
+to_polyline_3(const Open_curve_3& c, const double tolerance)
+{
+    std::vector<double> us = c.parameters(tolerance);
     std::vector<Point_3> ps;
-    const double x = *src++;
-    const double y = *src++;
-    const double z = *src++;
-    ps.push_back(Point_3(x, y, z));
-    for (std::size_t index = 1; index < numpoints; ++index) {
-        const double x = *src++;
-        const double y = *src++;
-        const double z = *src++;
-        Point_3 p(x, y, z);
+    ps.push_back(c.point(us[0]));
+    for (std::size_t index = 1; index < us.size(); ++index) {
+        Point_3 p = c.point(us[index]);
         if (!is_approximately_equal(p, ps.back())) {
             ps.push_back(p);
         }
     }
     return Polyline_3::create(ps);
-}
-
-Open_curve_3::Open_curve_3(Internal::Unique_sisl_curve_ptr curve)
-    : Curve_3(std::move(curve))
-{
 }
 
 } // namespace Geometry

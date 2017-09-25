@@ -18,12 +18,13 @@ public:
     fit(const bool is_periodic, const std::size_t order,
         const std::vector<Point_3>& ps);
     std::shared_ptr<const Open_curve_3> split(const double u) const;
-    std::shared_ptr<const Polygon_3>
-    to_polygon_3(const double tolerance = 1E-3) const;
 
 private:
     Closed_curve_3(Internal::Unique_sisl_curve_ptr curve);
 };
+
+std::shared_ptr<const Polygon_3>
+to_polygon_3(const Closed_curve_3& c, const double tolerance = 1E-3);
 
 } // namespace Geometry
 

@@ -16,6 +16,7 @@ public:
     const bool is_closed() const;
     const double knot(const std::size_t index) const;
     const std::size_t order() const;
+    std::vector<double> parameters(const double tolerance = 1E-3) const;
     const std::size_t size() const;
     const double u_min() const;
     const double u_max() const;

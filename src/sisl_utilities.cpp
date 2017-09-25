@@ -4,6 +4,7 @@
 #include "point_3.h"
 #include <cassert>
 #include <cstdlib>
+#include <stdexcept>
 
 namespace Geometry {
 

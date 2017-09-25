@@ -17,6 +17,7 @@ public:
     const Closed_curve_2& as_closed_curve_2() const;
     const Open_curve_2& as_open_curve_2() const;
     const Point_2 control(const std::size_t index) const;
+    const Point_2 point(const double u) const;
     std::shared_ptr<const Curve_3> to_curve_3() const;
 
 protected:
