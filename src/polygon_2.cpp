@@ -1,5 +1,6 @@
 #include "polygon_2.h"
 #include "clipper_utilities.h"
+#include "simple_polygon.h"
 #include <cassert>
 #include <utility>
 
@@ -24,6 +25,12 @@ Polygon_2::operator[](std::size_t index) const
     return points_[index];
 }
 
+const Simple_polygon&
+Polygon_2::as_simple_polygon() const
+{
+    return static_cast<const Simple_polygon&>(*this);
+}
+
 Polygon_2::Polygon_2(const std::vector<Point_2> points)
     : points_(std::move(points))
 {
@@ -36,24 +43,25 @@ Polygon_2::Polygon_2(const std::vector<Point_2> points)
     assert(!is_approximately_equal(points_.back(), points_.front()));
 }
 
-const std::vector<std::shared_ptr<const Polygon_2>>
-clip(const Clip_type type,
-     const std::vector<std::reference_wrapper<const Polygon_2>>& pss1,
-     const std::vector<std::reference_wrapper<const Polygon_2>>& pss2)
+const std::vector<std::shared_ptr<const Simple_polygon>>
+clip(const std::vector<std::reference_wrapper<const Polygon_2>>& pss1,
+     const std::vector<std::reference_wrapper<const Polygon_2>>& pss2,
+     const Clip_options& options)
 {
     ClipperLib::Clipper clipper;
+    clipper.StrictlySimple(true);
     for (const Polygon_2& ps : pss1) {
         clipper.AddPath(Internal::to_path(ps), ClipperLib::ptSubject, true);
     }
     for (const Polygon_2& ps : pss2) {
         clipper.AddPath(Internal::to_path(ps), ClipperLib::ptClip, true);
     }
-    ClipperLib::Paths pss_;
-    clipper.Execute(Internal::to_clip_type(type), pss_, ClipperLib::pftNonZero,
-                    ClipperLib::pftNonZero);
-    std::vector<std::shared_ptr<const Polygon_2>> pss;
-    for (const ClipperLib::Path& ps : pss_) {
-        pss.push_back(Internal::to_polygon_2(ps));
+    ClipperLib::Paths paths;
+    clipper.Execute(Internal::to_clip_type(options.clip_type), paths,
+                    ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+    std::vector<std::shared_ptr<const Simple_polygon>> pss;
+    for (const ClipperLib::Path& path : paths) {
+        pss.push_back(Internal::to_simple_polygon(path));
     }
     return pss;
 }

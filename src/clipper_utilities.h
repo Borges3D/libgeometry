@@ -4,15 +4,15 @@
 #include "cap_type.h"
 #include "clip_type.h"
 #include "join_type.h"
+#include "point_2.h"
 #include <clipper.hpp>
 #include <memory>
-#include "offset_options.h"
 
 namespace Geometry {
 
-class Point_2;
 class Polygon_2;
 class Polyline_2;
+class Simple_polygon;
 
 namespace Internal {
 
@@ -25,8 +25,10 @@ const ClipperLib::JoinType to_join_type(const Join_type type);
 ClipperLib::Path to_path(const Polygon_2& ps);
 ClipperLib::Path to_path(const Polyline_2& ps);
 Point_2 to_point_2(const ClipperLib::IntPoint& p);
-const std::shared_ptr<const Polygon_2>
+std::shared_ptr<const Polygon_2>
 to_polygon_2(const ClipperLib::Path& path);
+std::shared_ptr<const Simple_polygon>
+to_simple_polygon(const ClipperLib::Path& path);
 
 } // namespace Internal
 

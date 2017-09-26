@@ -1,13 +1,13 @@
-#ifndef GEOMETRY_CIRCLE_2_H
-#define GEOMETRY_CIRCLE_2_H
+#ifndef GEOMETRY_CIRCLE_H
+#define GEOMETRY_CIRCLE_H
 
 #include "point_2.h"
 
 namespace Geometry {
 
-class Circle_2 {
+class Circle {
 public:
-    Circle_2(const Point_2& center, const double radius);
+    Circle(const Point_2& center, const double radius);
     const Point_2& center() const;
     const double& radius() const;
 
@@ -18,4 +18,4 @@ private:
 
 } // namespace Geometry
 
-#endif // GEOMETRY_CIRCLE_2_H
+#endif // GEOMETRY_CIRCLE_H

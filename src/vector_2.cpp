@@ -1,6 +1,6 @@
 #include "vector_2.h"
 #include "point_2.h"
-#include "utilities.h"
+#include "scalar.h"
 #include <cmath>
 
 namespace Geometry {
@@ -61,9 +61,10 @@ length(const Vector_2& v)
 }
 
 const Vector_2
-lerp(const Vector_2& v1, const Vector_2& v2, const double t)
+interpolate(const Vector_2& v1, const Vector_2& v2, const double t)
 {
-    return Vector_2(lerp(v1.x(), v2.x(), t), lerp(v1.y(), v2.y(), t));
+    return Vector_2(interpolate(v1.x(), v2.x(), t),
+                    interpolate(v1.y(), v2.y(), t));
 }
 
 const Vector_2

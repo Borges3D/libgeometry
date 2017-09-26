@@ -1,9 +1,9 @@
 #include "closed_curve_3.h"
 #include "open_curve_3.h"
 #include "polygon_3.h"
+#include "scalar.h"
 #include "sisl_utilities.h"
 #include "unique_malloc_ptr.h"
-#include "utilities.h"
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
@@ -38,13 +38,11 @@ Closed_curve_3::create(const Polygon_3& ps)
     }
     double* dst = coef.get();
     for (std::size_t index = 0; index < ps.size(); ++index) {
-        std::size_t base = index * 3;
         const Point_3& p = ps[index];
         *dst++ = p.x();
         *dst++ = p.y();
         *dst++ = p.z();
     }
-    const std::size_t base = ps.size() * 3;
     const Point_3& p = ps[0];
     *dst++ = p.x();
     *dst++ = p.y();
@@ -89,7 +87,7 @@ Closed_curve_3::fit(const std::size_t order, const Polygon_3& ps,
         if (is_definitely_less(std::fabs(length(cross_product(v1, v2))),
                                smoothness) &&
             is_definitely_less(0.0, dot_product(v1, v2))) {
-            Vector_3 v = lerp(v1, v2, 0.5);
+            Vector_3 v = interpolate(v1, v2, 0.5);
             derivate.push_back(v.x());
             derivate.push_back(v.y());
             derivate.push_back(v.z());
@@ -153,7 +151,7 @@ Closed_curve_3::Closed_curve_3(Internal::Unique_sisl_curve_ptr curve)
 }
 
 std::shared_ptr<const Polygon_3>
-to_polygon_3(const Closed_curve_3& c, const double tolerance)
+linearize(const Closed_curve_3& c, const double tolerance)
 {
     std::vector<double> us = c.parameters(tolerance);
     std::vector<Point_3> ps;

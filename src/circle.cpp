@@ -1,20 +1,20 @@
-#include "circle_2.h"
+#include "circle.h"
 
 namespace Geometry {
 
-Circle_2::Circle_2(const Point_2& center, const double radius)
+Circle::Circle(const Point_2& center, const double radius)
     : center_(center), radius_(radius)
 {
 }
 
 const Point_2&
-Circle_2::center() const
+Circle::center() const
 {
     return center_;
 }
 
 const double&
-Circle_2::radius() const
+Circle::radius() const
 {
     return radius_;
 }

@@ -1,7 +1,8 @@
 #include "clipper_utilities.h"
-#include "polygon_2.h"
 #include "polyline_2.h"
+#include "simple_polygon.h"
 #include <cmath>
+#include <utility>
 
 namespace Geometry {
 
@@ -97,9 +98,12 @@ to_point_2(const ClipperLib::IntPoint& p)
     return Point_2(to_float(p.X), to_float(p.Y));
 }
 
-const std::shared_ptr<const Polygon_2>
+std::shared_ptr<const Polygon_2>
 to_polygon_2(const ClipperLib::Path& ps)
 {
+    if (ps.empty()) {
+        return nullptr;
+    }
     std::vector<Point_2> ps_;
     ps_.push_back(to_point_2(ps.front()));
     for (std::size_t index = 1; index < ps.size() - 1; ++index) {
@@ -113,6 +117,27 @@ to_polygon_2(const ClipperLib::Path& ps)
         ps_.push_back(p);
     }
     return Polygon_2::create(std::move(ps_));
+}
+
+std::shared_ptr<const Simple_polygon>
+to_simple_polygon(const ClipperLib::Path& ps)
+{
+    if (ps.empty()) {
+        return nullptr;
+    }
+    std::vector<Point_2> ps_;
+    ps_.push_back(to_point_2(ps.front()));
+    for (std::size_t index = 1; index < ps.size() - 1; ++index) {
+        const Point_2& p = to_point_2(ps[index]);
+        if (!is_approximately_equal(p, ps_.back())) {
+            ps_.push_back(p);
+        }
+    }
+    const Point_2& p = to_point_2(ps.back());
+    if (!is_approximately_equal(p, ps_.front())) {
+        ps_.push_back(p);
+    }
+    return Simple_polygon::create(std::move(ps_));
 }
 
 } // namespace Internal

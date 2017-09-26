@@ -1,5 +1,5 @@
 #include "point_2.h"
-#include "utilities.h"
+#include "scalar.h"
 
 namespace Geometry {
 

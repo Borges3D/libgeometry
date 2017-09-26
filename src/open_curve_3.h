@@ -23,11 +23,11 @@ public:
 private:
     friend class Closed_curve_3;
 
-    Open_curve_3(Internal::Unique_sisl_curve_ptr curve);
+    explicit Open_curve_3(Internal::Unique_sisl_curve_ptr curve);
 };
 
 std::shared_ptr<const Polyline_3>
-to_polyline_3(const Open_curve_3& c, const double tolerance = 1E-3);
+linearize(const Open_curve_3& c, const double tolerance = 1E-3);
 
 } // namespace Geometry
 

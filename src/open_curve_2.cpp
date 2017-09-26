@@ -2,9 +2,9 @@
 #include "closed_curve_2.h"
 #include "polygon_2.h"
 #include "polyline_2.h"
+#include "scalar.h"
 #include "sisl_utilities.h"
 #include "unique_malloc_ptr.h"
-#include "utilities.h"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -86,7 +86,7 @@ Open_curve_2::fit(const std::size_t order, const Polyline_2& ps,
         Vector_2 v2 = normalize(ps[std::min(index + 1, ps.size())] - p);
         if (is_definitely_less(std::fabs(cross_product(v1, v2)), smoothness) &&
             is_definitely_less(0.0, dot_product(v1, v2))) {
-            Vector_2 v = lerp(v1, v2, 0.5);
+            Vector_2 v = interpolate(v1, v2, 0.5);
             derivate.push_back(v.x());
             derivate.push_back(v.y());
         }
@@ -133,14 +133,14 @@ offset(const Open_curve_2& c, const Offset_options& options)
 {
     std::vector<std::shared_ptr<const Closed_curve_2>> cs;
     for (const std::shared_ptr<const Polygon_2>& ps :
-         offset(*to_polyline_2(c, options.tolerance), options)) {
+         offset(*linearize(c, options.tolerance), options)) {
         cs.push_back(Closed_curve_2::fit(c.order(), *ps, options.smoothness));
     }
     return cs;
 }
 
 std::shared_ptr<const Polyline_2>
-to_polyline_2(const Open_curve_2& c, const double tolerance)
+linearize(const Open_curve_2& c, const double tolerance)
 {
     std::vector<double> us = c.parameters(tolerance);
     std::vector<Point_2> ps;

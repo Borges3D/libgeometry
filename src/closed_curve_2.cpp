@@ -1,11 +1,11 @@
 #include "closed_curve_2.h"
-#include "circle_2.h"
+#include "circle.h"
 #include "open_curve_2.h"
-#include "polygon_2.h"
-#include "rectangle_2.h"
+#include "rectangle.h"
+#include "scalar.h"
+#include "simple_polygon.h"
 #include "sisl_utilities.h"
 #include "unique_malloc_ptr.h"
-#include "utilities.h"
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
@@ -14,7 +14,7 @@
 namespace Geometry {
 
 std::shared_ptr<const Closed_curve_2>
-Closed_curve_2::create(const Circle_2& c)
+Closed_curve_2::create(const Circle& c)
 {
     const Point_2& center = c.center();
     const double radius = c.radius();
@@ -31,15 +31,9 @@ Closed_curve_2::create(const Circle_2& c)
 }
 
 std::shared_ptr<const Closed_curve_2>
-Closed_curve_2::create(const Rectangle_2& r)
+Closed_curve_2::create(const Rectangle& r)
 {
-    const Point_2& start = r.start();
-    const double x1 = start.x();
-    const double y1 = start.y();
-    const Point_2& end = r.end();
-    const double x2 = end.x();
-    const double y2 = end.y();
-    return Closed_curve_2::create(*to_polygon_2(r));
+    return Closed_curve_2::create(*to_simple_polygon(r));
 }
 
 std::shared_ptr<const Closed_curve_2>
@@ -112,7 +106,7 @@ Closed_curve_2::fit(const std::size_t order, const Polygon_2& ps,
         Vector_2 v2 = normalize(ps[(index + 1) % ps.size()] - p);
         if (is_definitely_less(std::fabs(cross_product(v1, v2)), smoothness) &&
             is_definitely_less(0.0, dot_product(v1, v2))) {
-            Vector_2 v = lerp(v1, v2, 0.5);
+            Vector_2 v = interpolate(v1, v2, 0.5);
             derivate.push_back(v.x());
             derivate.push_back(v.y());
         }
@@ -174,11 +168,43 @@ Closed_curve_2::split(const double u) const
 }
 
 std::vector<std::shared_ptr<const Closed_curve_2>>
+clip(const std::vector<std::reference_wrapper<const Closed_curve_2>>& cs1, 
+     const std::vector<std::reference_wrapper<const Closed_curve_2>>& cs2, 
+     const Clip_options& options)
+{
+    std::size_t order = 0;
+    std::vector<std::shared_ptr<const Polygon_2>> pss1;
+    for (const Closed_curve_2& c : cs1) {
+        order = std::max(order, c.order());
+        pss1.push_back(linearize(c, options.tolerance));
+    }
+    std::vector<std::shared_ptr<const Polygon_2>> pss2;
+    for (const Closed_curve_2& c : cs2) {
+        order = std::max(order, c.order());
+        pss2.push_back(linearize(c, options.tolerance));
+    }
+    std::vector<std::reference_wrapper<const Polygon_2>> ps_refs_1;
+    for (const std::shared_ptr<const Polygon_2> ps : pss1) {
+        ps_refs_1.push_back(*ps);
+    }
+    std::vector<std::reference_wrapper<const Polygon_2>> ps_refs_2;
+    for (const std::shared_ptr<const Polygon_2> ps : pss2) {
+        ps_refs_2.push_back(*ps);
+    }
+    std::vector<std::shared_ptr<const Closed_curve_2>> cs;
+    for (const std::shared_ptr<const Simple_polygon>& ps :
+         clip(ps_refs_1, ps_refs_2, options)) {
+        cs.push_back(Closed_curve_2::fit(order, *ps, options.smoothness));
+    }
+    return cs;
+}
+
+std::vector<std::shared_ptr<const Closed_curve_2>>
 offset(const Closed_curve_2& c, const Offset_options& options)
 {
     std::vector<std::shared_ptr<const Closed_curve_2>> cs;
     for (const std::shared_ptr<const Polygon_2>& ps :
-         offset(*to_polygon_2(c, options.tolerance), options)) {
+         offset(*linearize(c, options.tolerance), options)) {
         cs.push_back(Closed_curve_2::fit(c.order(), *ps, options.smoothness));
     }
     return cs;
@@ -191,7 +217,7 @@ Closed_curve_2::Closed_curve_2(Internal::Unique_sisl_curve_ptr curve)
 }
 
 std::shared_ptr<const Polygon_2>
-to_polygon_2(const Closed_curve_2& c, const double tolerance)
+linearize(const Closed_curve_2& c, const double tolerance)
 {
     std::vector<double> us = c.parameters(tolerance);
     std::vector<Point_2> ps;

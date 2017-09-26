@@ -1,5 +1,5 @@
 #include "polyline_3.h"
-#include "utilities.h"
+#include "scalar.h"
 #include <cassert>
 
 namespace Geometry {

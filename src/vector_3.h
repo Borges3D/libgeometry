@@ -21,7 +21,8 @@ const double dot_product(const Vector_3& v1, const Vector_3& v2);
 const bool is_approximately_equal(const Vector_3& v1, const Vector_3& v2);
 const bool is_definitely_less(const Vector_3& v1, const Vector_3& v2);
 const double length(const Vector_3& v);
-const Vector_3 lerp(const Vector_3& v1, const Vector_3& v2, const double t);
+const Vector_3 interpolate(const Vector_3& v1, const Vector_3& v2,
+                           const double t);
 const Vector_3 normalize(const Vector_3& v);
 const Vector_3 operator+(const Vector_3& v);
 const Vector_3 operator+(const Vector_3& v1, const Vector_3& v2);

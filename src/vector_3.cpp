@@ -1,5 +1,5 @@
 #include "vector_3.h"
-#include "utilities.h"
+#include "scalar.h"
 #include <cmath>
 
 namespace Geometry {
@@ -82,10 +82,11 @@ length(const Vector_3& v)
 }
 
 const Vector_3
-lerp(const Vector_3& v1, const Vector_3& v2, const double t)
+interpolate(const Vector_3& v1, const Vector_3& v2, const double t)
 {
-    return Vector_3(lerp(v1.x(), v2.x(), t), lerp(v1.y(), v2.y(), t),
-                    lerp(v1.z(), v2.z(), t));
+    return Vector_3(interpolate(v1.x(), v2.x(), t),
+                    interpolate(v1.y(), v2.y(), t),
+                    interpolate(v1.z(), v2.z(), t));
 }
 
 const Vector_3

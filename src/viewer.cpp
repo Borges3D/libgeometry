@@ -2,10 +2,13 @@
 #include <GLUT/glut.h>
 #include <OpenGL/gl.h>
 #include <cstdlib>
+#include <iostream>
 
 using namespace Geometry;
 
 namespace {
+
+double angle = 0.0;
 
 void
 draw(const Polygon_2& ps)
@@ -54,13 +57,13 @@ draw(const Polyline_3& ps)
 void
 draw(const Closed_curve_2& c)
 {
-    draw(*to_polygon_2(c));
+    draw(*linearize(c));
 }
 
 void
 draw(const Open_curve_2& c)
 {
-    draw(*to_polyline_2(c));
+    draw(*linearize(c));
 }
 
 void
@@ -77,13 +80,13 @@ draw(const Curve_2& c)
 void
 draw(const Closed_curve_3& c)
 {
-    draw(*to_polygon_3(c));
+    draw(*linearize(c));
 }
 
 void
 draw(const Open_curve_3& c)
 {
-    draw(*to_polyline_3(c));
+    draw(*linearize(c));
 }
 
 void
@@ -97,17 +100,32 @@ draw(const Curve_3& c)
     }
 }
 
-
 void
-draw(const Circle_2& c)
+draw(const Circle& c)
 {
     draw(*Closed_curve_2::create(c));
 }
 
 void
-draw(const Rectangle_2& r)
+draw(const Rectangle& r)
 {
     draw(*Closed_curve_2::create(r));
+}
+
+void
+draw(const Mesh_2& m)
+{
+    for (std::size_t index = 0; index < m.faces_size(); ++index) {
+        glBegin(GL_LINE_LOOP);
+        const Face& f = m.face(index);
+        Point_2 p1 = m.vertex(f.a());
+        glVertex2f(p1.x(), p1.y());
+        Point_2 p2 = m.vertex(f.b());
+        glVertex2f(p2.x(), p2.y());
+        Point_2 p3 = m.vertex(f.c());
+        glVertex2f(p3.x(), p3.y());
+        glEnd();
+    }
 }
 
 std::shared_ptr<const Open_curve_2> c;
@@ -116,19 +134,20 @@ void
 display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
+    glLoadIdentity();
+    glRotated(angle, 5.0, 3.0, 1.0);
     glColor3f(1.0, 0.0, 0.0);
     draw(*c);
     for (std::shared_ptr<const Closed_curve_2> c : offset(*c, 0.2)) {
         glColor3f(0.0, 1.0, 0.0);
         draw(*c);
         for (std::shared_ptr<const Closed_curve_2> c : offset(*c, 0.1)) {
-            std::tuple<std::shared_ptr<const Open_curve_2>,
-                       std::shared_ptr<const Open_curve_2>>
-                c1c2 = c->split(c->u_min())->split((c->u_min() + c->u_max()) / 2.0);
             glColor3f(0.0, 0.0, 1.0);
-            draw(*std::get<0>(c1c2));
-            glColor3f(1.0, 0.0, 1.0);
-            draw(*std::get<1>(c1c2));
+            draw(*c);
+            glColor3f(0.5, 0.5, 0.5);
+            for (std::shared_ptr<const Simple_polygon> ps : simplify(*linearize(*c))) {
+                draw(*triangulate(*ps));
+            }
         }
     }
     glutSwapBuffers();
@@ -173,6 +192,14 @@ reshape(int width, int height)
     glutPostRedisplay();
 }
 
+void
+timer(int value)
+{
+    angle += 1.0;
+    glutPostRedisplay();
+    glutTimerFunc(1000.0 / 30.0, timer, 0);
+}
+
 } // namespace
 
 int
@@ -186,6 +213,7 @@ main(int argc, char** argv)
     // glutIdleFunc(idle);
     glutKeyboardFunc(keyboard);
     glutReshapeFunc(reshape);
+    glutTimerFunc(1000.0 / 30.0, timer, 0);
     generate();
     glutMainLoop();
     return 0;

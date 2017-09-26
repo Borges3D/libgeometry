@@ -1,5 +1,5 @@
 #include "polygon_3.h"
-#include "utilities.h"
+#include "scalar.h"
 #include <cassert>
 #include <utility>
 

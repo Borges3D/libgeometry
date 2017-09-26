@@ -1,4 +1,4 @@
-#include "utilities.h"
+#include "scalar.h"
 #include <cassert>
 #include <cmath>
 
@@ -30,7 +30,7 @@ is_definitely_less(const double x1, const double x2)
 }
 
 const double
-lerp(const double x1, const double x2, const double t)
+interpolate(const double x1, const double x2, const double t)
 {
     return (1 - t) * x1 + t * x2;
 }

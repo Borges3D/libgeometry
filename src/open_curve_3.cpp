@@ -1,8 +1,8 @@
 #include "open_curve_3.h"
 #include "polyline_3.h"
+#include "scalar.h"
 #include "sisl_utilities.h"
 #include "unique_malloc_ptr.h"
-#include "utilities.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -86,7 +86,7 @@ Open_curve_3::fit(const std::size_t order, const Polyline_3& ps,
         if (is_definitely_less(std::fabs(length(cross_product(v1, v2))),
                                smoothness) &&
             is_definitely_less(0.0, dot_product(v1, v2))) {
-            Vector_3 v = lerp(v1, v2, 0.5);
+            Vector_3 v = interpolate(v1, v2, 0.5);
             derivate.push_back(v.x());
             derivate.push_back(v.y());
             derivate.push_back(v.z());
@@ -131,7 +131,7 @@ Open_curve_3::Open_curve_3(Internal::Unique_sisl_curve_ptr curve)
 }
 
 std::shared_ptr<const Polyline_3>
-to_polyline_3(const Open_curve_3& c, const double tolerance)
+linearize(const Open_curve_3& c, const double tolerance)
 {
     std::vector<double> us = c.parameters(tolerance);
     std::vector<Point_3> ps;

@@ -2,8 +2,8 @@
 #include "closed_curve_2.h"
 #include "curve_3.h"
 #include "open_curve_2.h"
+#include "scalar.h"
 #include "unique_malloc_ptr.h"
-#include "utilities.h"
 #include <cassert>
 #include <cstdlib>
 #include <stdexcept>
