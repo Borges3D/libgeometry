@@ -25,6 +25,13 @@ distance(const Point_2& p1, const Point_2& p2)
     return length(p2 - p1);
 }
 
+const Point_2
+interpolate(const Point_2& p1, const Point_2& p2, const double t)
+{
+    return Point_2(interpolate(p1.x(), p2.x(), t),
+                   interpolate(p1.y(), p2.y(), t));
+}
+
 const bool
 is_approximately_equal(const Point_2& p1, const Point_2& p2)
 {

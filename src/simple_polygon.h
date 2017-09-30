@@ -16,8 +16,7 @@ private:
     explicit Simple_polygon(const std::vector<Point_2> points);
 };
 
-std::vector<std::shared_ptr<const Simple_polygon>>
-simplify(const Polygon_2& ps);
+const Point_2 get_internal_point(const Simple_polygon& ps);
 std::shared_ptr<const Mesh_2> triangulate(const Simple_polygon& ps);
 
 } // namespace Geometry

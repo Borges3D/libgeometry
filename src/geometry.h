@@ -14,5 +14,7 @@
 #include "rectangle.h"
 #include "scalar.h"
 #include "simple_polygon.h"
+#include "simple_polygon_node.h"
+#include "simple_polygon_node_visitor.h"
 
 #endif // GEOMETRY_H

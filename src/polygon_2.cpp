@@ -66,6 +66,27 @@ clip(const std::vector<std::reference_wrapper<const Polygon_2>>& pss1,
     return pss;
 }
 
+const bool
+has_boundary_point(const Polygon_2& ps, const Point_2& p)
+{
+    return ClipperLib::PointInPolygon(Internal::to_int_point(p),
+                                      Internal::to_path(ps)) == -1;
+}
+
+const bool
+has_internal_point(const Polygon_2& ps, const Point_2& p)
+{
+    return ClipperLib::PointInPolygon(Internal::to_int_point(p),
+                                      Internal::to_path(ps)) == +1;
+}
+
+const bool
+has_point(const Polygon_2& ps, const Point_2& p)
+{
+    return ClipperLib::PointInPolygon(Internal::to_int_point(p),
+                                      Internal::to_path(ps)) != 0;
+}
+
 const double
 length(const Polygon_2& ps)
 {
@@ -108,6 +129,18 @@ parameters(const Polygon_2& ps)
         ts.push_back(d / len);
     }
     return ts;
+}
+
+std::vector<std::shared_ptr<const Simple_polygon>>
+simplify(const Polygon_2& ps)
+{
+    ClipperLib::Paths paths;
+    ClipperLib::SimplifyPolygon(Internal::to_path(ps), paths);
+    std::vector<std::shared_ptr<const Simple_polygon>> pss;
+    for (const ClipperLib::Path& path : paths) {
+        pss.push_back(Internal::to_simple_polygon(path));
+    }
+    return pss;
 }
 
 } // namespace Geometry

@@ -136,6 +136,7 @@ display(void)
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
     glRotated(angle, 5.0, 3.0, 1.0);
+    std::vector<std::shared_ptr<const Polygon_2>> pss;
     glColor3f(1.0, 0.0, 0.0);
     draw(*c);
     for (std::shared_ptr<const Closed_curve_2> c : offset(*c, 0.2)) {
@@ -144,12 +145,15 @@ display(void)
         for (std::shared_ptr<const Closed_curve_2> c : offset(*c, 0.1)) {
             glColor3f(0.0, 0.0, 1.0);
             draw(*c);
-            glColor3f(0.5, 0.5, 0.5);
-            for (std::shared_ptr<const Simple_polygon> ps : simplify(*linearize(*c))) {
-                draw(*triangulate(*ps));
-            }
+            pss.push_back(linearize(*c));
         }
     }
+    std::vector<std::reference_wrapper<const Polygon_2>> ps_refs;
+    for (const std::shared_ptr<const Polygon_2>& ps : pss) {
+        ps_refs.push_back(*ps);
+    }
+    glColor3f(0.5, 0.5, 0.5);
+    draw(*triangulate(*to_simple_polygon_tree(ps_refs)));
     glutSwapBuffers();
 }
 

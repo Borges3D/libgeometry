@@ -13,6 +13,7 @@ namespace Geometry {
 class Polygon_2;
 class Polyline_2;
 class Simple_polygon;
+class Simple_polygon_node;
 
 namespace Internal {
 
@@ -29,6 +30,8 @@ std::shared_ptr<const Polygon_2>
 to_polygon_2(const ClipperLib::Path& path);
 std::shared_ptr<const Simple_polygon>
 to_simple_polygon(const ClipperLib::Path& path);
+std::unique_ptr<const Simple_polygon_node>
+to_simple_polygon_tree(const ClipperLib::PolyTree& tree);
 
 } // namespace Internal
 

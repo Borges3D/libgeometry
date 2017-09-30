@@ -33,6 +33,13 @@ dot_product(const Vector_2& v1, const Vector_2& v2)
     return v1.x() * v2.x() + v1.y() * v2.y();
 }
 
+const Vector_2
+interpolate(const Vector_2& v1, const Vector_2& v2, const double t)
+{
+    return Vector_2(interpolate(v1.x(), v2.x(), t),
+                    interpolate(v1.y(), v2.y(), t));
+}
+
 const bool
 is_approximately_equal(const Vector_2& v1, const Vector_2& v2)
 {
@@ -58,13 +65,6 @@ const double
 length(const Vector_2& v)
 {
     return std::sqrt(squared_length(v));
-}
-
-const Vector_2
-interpolate(const Vector_2& v1, const Vector_2& v2, const double t)
-{
-    return Vector_2(interpolate(v1.x(), v2.x(), t),
-                    interpolate(v1.y(), v2.y(), t));
 }
 
 const Vector_2

@@ -1,6 +1,7 @@
 #include "clipper_utilities.h"
 #include "polyline_2.h"
 #include "simple_polygon.h"
+#include "simple_polygon_node.h"
 #include <cmath>
 #include <utility>
 
@@ -11,6 +12,17 @@ namespace Internal {
 namespace {
 
 constexpr int fractional_bits = 32;
+
+std::unique_ptr<const Simple_polygon_node>
+to_simple_polygon_tree(const ClipperLib::PolyNode& node, const bool is_hole)
+{
+    std::vector<std::unique_ptr<const Simple_polygon_node>> children;
+    for (const ClipperLib::PolyNode* child : node.Childs) {
+        children.push_back(to_simple_polygon_tree(*child, !is_hole));
+    }
+    return Simple_polygon_node::create(is_hole, to_simple_polygon(node.Contour),
+                                       std::move(children));
+}
 
 } // namespace
 
@@ -93,51 +105,55 @@ to_path(const Polyline_2& ps)
 }
 
 Point_2
-to_point_2(const ClipperLib::IntPoint& p)
+to_point_2(const ClipperLib::IntPoint& point)
 {
-    return Point_2(to_float(p.X), to_float(p.Y));
+    return Point_2(to_float(point.X), to_float(point.Y));
 }
 
 std::shared_ptr<const Polygon_2>
-to_polygon_2(const ClipperLib::Path& ps)
+to_polygon_2(const ClipperLib::Path& path)
 {
-    if (ps.empty()) {
-        return nullptr;
-    }
-    std::vector<Point_2> ps_;
-    ps_.push_back(to_point_2(ps.front()));
-    for (std::size_t index = 1; index < ps.size() - 1; ++index) {
-        const Point_2& p = to_point_2(ps[index]);
-        if (!is_approximately_equal(p, ps_.back())) {
-            ps_.push_back(p);
+    std::vector<Point_2> ps;
+    ps.push_back(to_point_2(path.front()));
+    for (std::size_t index = 1; index < path.size() - 1; ++index) {
+        const Point_2& p = to_point_2(path[index]);
+        if (!is_approximately_equal(p, ps.back())) {
+            ps.push_back(p);
         }
     }
-    const Point_2& p = to_point_2(ps.back());
-    if (!is_approximately_equal(p, ps_.front())) {
-        ps_.push_back(p);
+    const Point_2& p = to_point_2(path.back());
+    if (!is_approximately_equal(p, ps.front())) {
+        ps.push_back(p);
     }
-    return Polygon_2::create(std::move(ps_));
+    return Polygon_2::create(std::move(ps));
 }
 
 std::shared_ptr<const Simple_polygon>
-to_simple_polygon(const ClipperLib::Path& ps)
+to_simple_polygon(const ClipperLib::Path& path)
 {
-    if (ps.empty()) {
-        return nullptr;
-    }
-    std::vector<Point_2> ps_;
-    ps_.push_back(to_point_2(ps.front()));
-    for (std::size_t index = 1; index < ps.size() - 1; ++index) {
-        const Point_2& p = to_point_2(ps[index]);
-        if (!is_approximately_equal(p, ps_.back())) {
-            ps_.push_back(p);
+    std::vector<Point_2> ps;
+    ps.push_back(to_point_2(path.front()));
+    for (std::size_t index = 1; index < path.size() - 1; ++index) {
+        const Point_2& p = to_point_2(path[index]);
+        if (!is_approximately_equal(p, ps.back())) {
+            ps.push_back(p);
         }
     }
-    const Point_2& p = to_point_2(ps.back());
-    if (!is_approximately_equal(p, ps_.front())) {
-        ps_.push_back(p);
+    const Point_2& p = to_point_2(path.back());
+    if (!is_approximately_equal(p, ps.front())) {
+        ps.push_back(p);
     }
-    return Simple_polygon::create(std::move(ps_));
+    return Simple_polygon::create(std::move(ps));
+}
+
+std::unique_ptr<const Simple_polygon_node>
+to_simple_polygon_tree(const ClipperLib::PolyTree& tree)
+{
+    std::vector<std::unique_ptr<const Simple_polygon_node>> children;
+    for (const ClipperLib::PolyNode* child : tree.Childs) {
+        children.push_back(to_simple_polygon_tree(*child, false));
+    }
+    return Simple_polygon_node::create(false, nullptr, std::move(children));
 }
 
 } // namespace Internal

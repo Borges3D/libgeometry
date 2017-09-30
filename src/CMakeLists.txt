@@ -28,9 +28,11 @@ SET(GEOMETRY_SOURCES
     rectangle.cpp
     scalar.cpp
     simple_polygon.cpp
+    simple_polygon_node.cpp
     sisl_utilities.cpp
     unique_malloc_ptr.cpp
     unique_sisl_curve_ptr.cpp
+    unique_sisl_surf_ptr.cpp
     vector_2.cpp
     vector_3.cpp
 )

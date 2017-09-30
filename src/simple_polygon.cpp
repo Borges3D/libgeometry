@@ -18,16 +18,18 @@ Simple_polygon::Simple_polygon(const std::vector<Point_2> points)
 {
 }
 
-std::vector<std::shared_ptr<const Simple_polygon>>
-simplify(const Polygon_2& ps)
+
+const Point_2
+get_internal_point(const Simple_polygon& ps)
 {
-    ClipperLib::Paths paths;
-    ClipperLib::SimplifyPolygon(Internal::to_path(ps), paths);
-    std::vector<std::shared_ptr<const Simple_polygon>> pss;
-    for (const ClipperLib::Path& path : paths) {
-        pss.push_back(Internal::to_simple_polygon(path));
+    for (std::size_t index = 0; index < ps.size(); ++index) {
+        const Point_2 p =
+            interpolate(ps[index], ps[(index + 2) % ps.size()], 0.5);
+        if (has_internal_point(ps, p)) {
+            return p;
+        }
     }
-    return pss;
+    throw std::runtime_error("");
 }
 
 std::shared_ptr<const Mesh_2>

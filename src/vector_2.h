@@ -16,11 +16,11 @@ private:
 
 const double cross_product(const Vector_2& v1, const Vector_2& v2);
 const double dot_product(const Vector_2& v1, const Vector_2& v2);
+const Vector_2 interpolate(const Vector_2& v1, const Vector_2& v2,
+                           const double t);
 const bool is_approximately_equal(const Vector_2& v1, const Vector_2& v2);
 const bool is_definitely_less(const Vector_2& v1, const Vector_2& v2);
 const double length(const Vector_2& v);
-const Vector_2 interpolate(const Vector_2& v1, const Vector_2& v2,
-                           const double t);
 const Vector_2 normalize(const Vector_2& v);
 const Vector_2 operator+(const Vector_2& v);
 const Vector_2 operator+(const Vector_2& v1, const Vector_2& v2);

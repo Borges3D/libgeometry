@@ -17,6 +17,7 @@ private:
 };
 
 const double distance(const Point_2& p1, const Point_2& p2);
+const Point_2 interpolate(const Point_2& v1, const Point_2& v2, const double t);
 const bool is_approximately_equal(const Point_2& p1, const Point_2& p2);
 const bool is_definitely_less(const Point_2& p1, const Point_2& p2);
 const Point_2 operator+(const Point_2& p, const Vector_2& v);

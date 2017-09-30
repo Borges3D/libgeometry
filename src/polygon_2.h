@@ -25,14 +25,19 @@ protected:
     const std::vector<Point_2> points_;
 };
 
+const double length(const Polygon_2& ps);
 const std::vector<std::shared_ptr<const Simple_polygon>>
 clip(const std::vector<std::reference_wrapper<const Polygon_2>>& pss1,
      const std::vector<std::reference_wrapper<const Polygon_2>>& pss2,
      const Clip_options& options);
-const double length(const Polygon_2& ps);
+const bool has_boundary_point(const Polygon_2& ps, const Point_2& p);
+const bool has_internal_point(const Polygon_2& ps, const Point_2& p);
+const bool has_point(const Polygon_2& ps, const Point_2& p);
 const std::vector<std::shared_ptr<const Polygon_2>>
 offset(const Polygon_2& ps, const Offset_options& options);
 const std::vector<double> parameters(const Polygon_2& ps);
+std::vector<std::shared_ptr<const Simple_polygon>>
+simplify(const Polygon_2& ps);
 
 } // namespace Geometry
 
